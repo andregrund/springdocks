@@ -12,3 +12,6 @@ buildNumber.properties
 *.iml
 *.idea
 
+*.wav
+*.jar
+*.DS_Store
