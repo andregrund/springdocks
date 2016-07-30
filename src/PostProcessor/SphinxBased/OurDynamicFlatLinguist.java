@@ -11,15 +11,6 @@
  */
 package PostProcessor.SphinxBased;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import Data.PhoneData;
 import edu.cmu.sphinx.decoder.scorer.ScoreProvider;
 import edu.cmu.sphinx.frontend.Data;
@@ -48,6 +39,16 @@ import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.S4Boolean;
 import edu.cmu.sphinx.util.props.S4Component;
 import edu.cmu.sphinx.util.props.S4Double;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * A simple form of the linguist. It makes the following simplifying assumptions: 1) Zero or one word per grammar node
  * 2) No fan-in allowed ever 3) No composites (yet) 4) Only Unit, HMMState, and pronunciation states (and the
@@ -59,34 +60,47 @@ import edu.cmu.sphinx.util.props.S4Double;
  * <p/>
  * Note that all probabilities are maintained in the log math domain
  */
-public class OurDynamicFlatLinguist implements Linguist, Configurable
-{
+public class OurDynamicFlatLinguist implements Linguist, Configurable {
 
-    /** The property used to define the grammar to use when building the search graph */
+    /**
+     * The property used to define the grammar to use when building the search graph
+     */
     @S4Component(type = Grammar.class)
     public final static String GRAMMAR = "grammar";
 
-    /** The property used to define the unit manager to use when building the search graph */
+    /**
+     * The property used to define the unit manager to use when building the search graph
+     */
     @S4Component(type = UnitManager.class)
     public final static String UNIT_MANAGER = "unitManager";
 
-    /** The property used to define the acoustic model to use when building the search graph */
+    /**
+     * The property used to define the acoustic model to use when building the search graph
+     */
     @S4Component(type = AcousticModel.class)
     public final static String ACOUSTIC_MODEL = "acousticModel";
 
-    /** The property that specifies whether to add a branch for detecting out-of-grammar utterances. */
+    /**
+     * The property that specifies whether to add a branch for detecting out-of-grammar utterances.
+     */
     @S4Boolean(defaultValue = false)
     public final static String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
 
-    /** The property for the probability of entering the out-of-grammar branch. */
+    /**
+     * The property for the probability of entering the out-of-grammar branch.
+     */
     @S4Double(defaultValue = 1.0)
     public final static String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
 
-    /** The property for the probability of inserting a CI phone in the out-of-grammar ci phone loop */
+    /**
+     * The property for the probability of inserting a CI phone in the out-of-grammar ci phone loop
+     */
     @S4Double(defaultValue = 1.0)
     public static final String PHONE_INSERTION_PROBABILITY = "phoneInsertionProbability";
 
-    /** The property for the acoustic model to use to build the phone loop that detects out of grammar utterances. */
+    /**
+     * The property for the acoustic model to use to build the phone loop that detects out of grammar utterances.
+     */
     @S4Component(type = AcousticModel.class)
     public final static String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
 
@@ -97,21 +111,32 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
     //
     // -----------------------------------
     private Grammar grammar;
+
     private AcousticModel acousticModel;
+
     private AcousticModel phoneLoopAcousticModel;
+
     private LogMath logMath;
+
     // ------------------------------------
     // Data that is configured by the
     // property sheet
     // ------------------------------------
     private float logWordInsertionProbability;
+
     private float logSilenceInsertionProbability;
+
     private float logUnitInsertionProbability;
+
     private float logFillerInsertionProbability;
+
     private float languageWeight;
+
     @SuppressWarnings("unused")
     private float logOutOfGrammarBranchProbability;
+
     private float logPhoneInsertionProbability;
+
     private boolean addOutOfGrammarBranch;
 
     // ------------------------------------
@@ -119,8 +144,11 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
     // the search graph
     // -------------------------------------
     private SearchGraph searchGraph;
+
     private Logger logger;
+
     SearchStateArc outOfGrammarGraph;
+
     private GrammarNode initialGrammarState;
 
     // this map is used to manage the set of follow on units for a
@@ -138,18 +166,10 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
     // an empty arc (just waiting for Noah, I guess)
     private final SearchStateArc[] EMPTY_ARCS = new SearchStateArc[0];
 
-    public OurDynamicFlatLinguist(AcousticModel acousticModel, 
-            Grammar grammar,
-            double wordInsertionProbability,
-            double silenceInsertionProbability,
-            double unitInsertionProbability, 
-            double fillerInsertionProbability,
-            float languageWeight, 
-            boolean addOutOfGrammarBranch,
-            double outOfGrammarBranchProbability,
-            double phoneInsertionProbability,
-            AcousticModel phoneLoopAcousticModel)
-    {
+    public OurDynamicFlatLinguist(AcousticModel acousticModel, Grammar grammar, double wordInsertionProbability,
+        double silenceInsertionProbability, double unitInsertionProbability, double fillerInsertionProbability,
+        float languageWeight, boolean addOutOfGrammarBranch, double outOfGrammarBranchProbability,
+        double phoneInsertionProbability, AcousticModel phoneLoopAcousticModel) {
 
         this.logger = Logger.getLogger(getClass().getName());
         this.acousticModel = acousticModel;
@@ -165,14 +185,12 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
         this.logOutOfGrammarBranchProbability = logMath.linearToLog(outOfGrammarBranchProbability);
 
         this.logPhoneInsertionProbability = logMath.linearToLog(logPhoneInsertionProbability);
-        if (addOutOfGrammarBranch)
-        {
+        if (addOutOfGrammarBranch) {
             this.phoneLoopAcousticModel = phoneLoopAcousticModel;
         }
     }
 
-    public OurDynamicFlatLinguist()
-    {
+    public OurDynamicFlatLinguist() {
     }
 
     /*
@@ -182,16 +200,13 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
     * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
     */
     @Override
-    public void newProperties(PropertySheet ps) throws PropertyException
-    {
+    public void newProperties(PropertySheet ps) throws PropertyException {
         // hookup to all of the components
         logger = ps.getLogger();
         acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
 
-        
         logMath = LogMath.getLogMath();
         grammar = (Grammar) ps.getComponent(GRAMMAR);
-        
 
         // get the rest of the configuration data
         logWordInsertionProbability = logMath.linearToLog(ps.getDouble(PROP_WORD_INSERTION_PROBABILITY));
@@ -203,8 +218,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
         logOutOfGrammarBranchProbability = logMath.linearToLog(ps.getDouble(OUT_OF_GRAMMAR_PROBABILITY));
 
         logPhoneInsertionProbability = logMath.linearToLog(ps.getDouble(PHONE_INSERTION_PROBABILITY));
-        if (addOutOfGrammarBranch)
-        {
+        if (addOutOfGrammarBranch) {
             phoneLoopAcousticModel = (AcousticModel) ps.getComponent(PHONE_LOOP_ACOUSTIC_MODEL);
         }
     }
@@ -215,8 +229,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      * @return the search graph
      */
     @Override
-    public SearchGraph getSearchGraph()
-    {
+    public SearchGraph getSearchGraph() {
         return searchGraph;
     }
 
@@ -226,15 +239,12 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      * @param ps the PropertySheet from which to obtain the acoustic model
      * @throws edu.cmu.sphinx.util.props.PropertyException
      */
-    protected void setupAcousticModel(PropertySheet ps)
-            throws PropertyException
-    {
+    protected void setupAcousticModel(PropertySheet ps) throws PropertyException {
         acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
     }
 
     @Override
-    public void allocate() throws IOException
-    {
+    public void allocate() throws IOException {
         logger.info("Allocating DFLAT");
         allocateAcousticModel();
         grammar.allocate();
@@ -247,13 +257,14 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
         logger.info("Done allocating  DFLAT");
     }
 
-    /** Allocates the acoustic model.
-     * @throws java.io.IOException*/
-    protected void allocateAcousticModel() throws IOException
-    {
+    /**
+     * Allocates the acoustic model.
+     *
+     * @throws java.io.IOException
+     */
+    protected void allocateAcousticModel() throws IOException {
         acousticModel.allocate();
-        if (addOutOfGrammarBranch)
-        {
+        if (addOutOfGrammarBranch) {
             phoneLoopAcousticModel.allocate();
         }
     }
@@ -264,29 +275,28 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
     * @see edu.cmu.sphinx.linguist.Linguist#deallocate()
     */
     @Override
-    public void deallocate()
-    {
-        if (acousticModel != null)
-        {
+    public void deallocate() {
+        if (acousticModel != null) {
             acousticModel.deallocate();
         }
         grammar.deallocate();
     }
 
-    /** Called before a recognition */
+    /**
+     * Called before a recognition
+     */
     @Override
-    public void startRecognition()
-    {
-        if (grammarHasChanged())
-        {
+    public void startRecognition() {
+        if (grammarHasChanged()) {
             compileGrammar();
         }
     }
 
-    /** Called after a recognition */
+    /**
+     * Called after a recognition
+     */
     @Override
-    public void stopRecognition()
-    {
+    public void stopRecognition() {
     }
 
     /**
@@ -294,8 +304,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      *
      * @return the log silence insertion probability.
      */
-    public float getLogSilenceInsertionProbability()
-    {
+    public float getLogSilenceInsertionProbability() {
         return logSilenceInsertionProbability;
     }
 
@@ -304,18 +313,14 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      *
      * @return true if the grammar has changed
      */
-    private boolean grammarHasChanged()
-    {
-        return initialGrammarState == null
-                || initialGrammarState != grammar.getInitialNode();
+    private boolean grammarHasChanged() {
+        return initialGrammarState == null || initialGrammarState != grammar.getInitialNode();
     }
 
-    private void compileGrammar()
-    {
+    private void compileGrammar() {
         initialGrammarState = grammar.getInitialNode();
 
-        for (GrammarNode node : grammar.getGrammarNodes())
-        {
+        for (GrammarNode node : grammar.getGrammarNodes()) {
             initUnitMaps(node);
         }
 
@@ -331,26 +336,22 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      *
      * @param node the units maps will be created for this node.
      */
-    private void initUnitMaps(GrammarNode node)
-    {
+    private void initUnitMaps(GrammarNode node) {
 
         // collect the set of next units for this node
 
-        if (nodeToNextUnitArrayMap.get(node) == null)
-        {
+        if (nodeToNextUnitArrayMap.get(node) == null) {
             Set<GrammarNode> vistedNodes = new HashSet<GrammarNode>();
             Set<Unit> unitSet = new HashSet<Unit>();
 
             GrammarArc[] arcs = node.getSuccessors();
-            for (GrammarArc arc : arcs)
-            {
+            for (GrammarArc arc : arcs) {
                 GrammarNode nextNode = arc.getGrammarNode();
                 collectNextUnits(nextNode, vistedNodes, unitSet);
             }
             int[] nextUnits = new int[unitSet.size()];
             int index = 0;
-            for (Unit unit : unitSet)
-            {
+            for (Unit unit : unitSet) {
                 nextUnits[index++] = unit.getBaseID();
             }
             nodeToNextUnitArrayMap.put(node, nextUnits);
@@ -358,8 +359,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
 
         // collect the set of entry units for this node
 
-        if (nodeToUnitSetMap.get(node) == null)
-        {
+        if (nodeToUnitSetMap.get(node) == null) {
             Set<GrammarNode> vistedNodes = new HashSet<GrammarNode>();
             Set<Unit> unitSet = new HashSet<Unit>();
             collectNextUnits(node, vistedNodes, unitSet);
@@ -375,33 +375,23 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      *                    grammar node more than once (which could lead to a death spiral)
      * @param unitSet     the entry units are collected here.
      */
-    private void collectNextUnits(GrammarNode thisNode,
-            Set<GrammarNode> vistedNodes, Set<Unit> unitSet)
-    {
-        if (vistedNodes.contains(thisNode))
-        {
+    private void collectNextUnits(GrammarNode thisNode, Set<GrammarNode> vistedNodes, Set<Unit> unitSet) {
+        if (vistedNodes.contains(thisNode)) {
             return;
         }
 
         vistedNodes.add(thisNode);
-        if (thisNode.isFinalNode())
-        {
+        if (thisNode.isFinalNode()) {
             unitSet.add(UnitManager.SILENCE);
-        }
-        else if (!thisNode.isEmpty())
-        {
+        } else if (!thisNode.isEmpty()) {
             Word word = thisNode.getWord();
             Pronunciation[] pronunciations = word.getPronunciations();
-            for (Pronunciation pronunciation : pronunciations)
-            {
+            for (Pronunciation pronunciation : pronunciations) {
                 unitSet.add(pronunciation.getUnits()[0]);
             }
-        }
-        else
-        {
+        } else {
             GrammarArc[] arcs = thisNode.getSuccessors();
-            for (GrammarArc arc : arcs)
-            {
+            for (GrammarArc arc : arcs) {
                 GrammarNode nextNode = arc.getGrammarNode();
                 collectNextUnits(nextNode, vistedNodes, unitSet);
             }
@@ -410,9 +400,10 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
 
     final Map<SearchState, SearchStateArc[]> successorCache = new HashMap<SearchState, SearchStateArc[]>();
 
-    /** The base search state for this dynamic flat linguist. */
-    abstract class FlatSearchState implements SearchState, SearchStateArc
-    {
+    /**
+     * The base search state for this dynamic flat linguist.
+     */
+    abstract class FlatSearchState implements SearchState, SearchStateArc {
 
         final static int ANY = 0;
 
@@ -447,8 +438,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return true if this is an emitting state
          */
         @Override
-        public boolean isEmitting()
-        {
+        public boolean isEmitting() {
             return false;
         }
 
@@ -458,8 +448,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return true if this is a final state
          */
         @Override
-        public boolean isFinal()
-        {
+        public boolean isFinal() {
             return false;
         }
 
@@ -469,8 +458,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the lex state (null for this linguist)
          */
         @Override
-        public Object getLexState()
-        {
+        public Object getLexState() {
             return null;
         }
 
@@ -480,8 +468,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the formatted string
          */
         @Override
-        public String toPrettyString()
-        {
+        public String toPrettyString() {
             return toString();
         }
 
@@ -491,8 +478,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return a string representation
          */
         @Override
-        public String toString()
-        {
+        public String toString() {
             return getSignature();
         }
 
@@ -502,8 +488,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the word history (null for this linguist)
          */
         @Override
-        public WordSequence getWordHistory()
-        {
+        public WordSequence getWordHistory() {
             return null;
         }
 
@@ -513,8 +498,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the successor state
          */
         @Override
-        public SearchState getState()
-        {
+        public SearchState getState() {
             return this;
         }
 
@@ -524,8 +508,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the log probability
          */
         @Override
-        public float getProbability()
-        {
+        public float getProbability() {
             return getLanguageProbability() + getInsertionProbability();
         }
 
@@ -535,8 +518,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the log probability
          */
         @Override
-        public float getLanguageProbability()
-        {
+        public float getLanguageProbability() {
             return LogMath.LOG_ONE;
         }
 
@@ -546,8 +528,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the log probability
          */
         @Override
-        public float getInsertionProbability()
-        {
+        public float getInsertionProbability() {
             return LogMath.LOG_ONE;
         }
 
@@ -556,8 +537,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the cached arcs or null
          */
-        SearchStateArc[] getCachedSuccessors()
-        {
+        SearchStateArc[] getCachedSuccessors() {
             return successorCache.get(this);
         }
 
@@ -566,8 +546,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @param successors the set of arcs to be cached for this state
          */
-        void cacheSuccessors(SearchStateArc[] successors)
-        {
+        void cacheSuccessors(SearchStateArc[] successors) {
             successorCache.put(this, successors);
         }
     }
@@ -576,12 +555,14 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
      * Represents a grammar node in the search graph. A grammar state needs to keep track of the associated grammar node
      * as well as the left context and next base unit.
      */
-    class GrammarState extends FlatSearchState
-    {
+    class GrammarState extends FlatSearchState {
 
         private final GrammarNode node;
+
         private final int lc;
+
         private final int nextBaseID;
+
         private final float languageProbability;
 
         /**
@@ -589,8 +570,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @param node the grammar node
          */
-        GrammarState(GrammarNode node)
-        {
+        GrammarState(GrammarNode node) {
             this(node, LogMath.LOG_ONE, UnitManager.SILENCE.getBaseID());
         }
 
@@ -601,8 +581,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param languageProbability the probability of transistioning to this word
          * @param lc                  the left context for this path
          */
-        GrammarState(GrammarNode node, float languageProbability, int lc)
-        {
+        GrammarState(GrammarNode node, float languageProbability, int lc) {
             this(node, languageProbability, lc, ANY);
         }
 
@@ -614,9 +593,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param lc                  the left context for this path
          * @param nextBaseID          the next base ID
          */
-        GrammarState(GrammarNode node, float languageProbability, int lc,
-                int nextBaseID)
-        {
+        GrammarState(GrammarNode node, float languageProbability, int lc, int nextBaseID) {
             this.lc = lc;
             this.nextBaseID = nextBaseID;
             this.node = node;
@@ -629,8 +606,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the log probability
          */
         @Override
-        public float getLanguageProbability()
-        {
+        public float getLanguageProbability() {
             return languageProbability * languageWeight;
         }
 
@@ -641,8 +617,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the hashcode
          */
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return node.hashCode() * 17 + lc * 7 + nextBaseID;
         }
 
@@ -653,20 +628,13 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return <code>true</code> if the object is equal to this
          */
         @Override
-        public boolean equals(Object o)
-        {
-            if (o == this)
-            {
+        public boolean equals(Object o) {
+            if (o == this) {
                 return true;
-            }
-            else if (o instanceof GrammarState)
-            {
+            } else if (o instanceof GrammarState) {
                 GrammarState other = (GrammarState) o;
-                return other.node == node && lc == other.lc
-                        && nextBaseID == other.nextBaseID;
-            }
-            else
-            {
+                return other.node == node && lc == other.lc && nextBaseID == other.nextBaseID;
+            } else {
                 return false;
             }
         }
@@ -677,36 +645,28 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return true if this is a final state in the search graph
          */
         @Override
-        public boolean isFinal()
-        {
+        public boolean isFinal() {
             return node.isFinalNode();
         }
 
         /**
          * Gets the set of successors for this state
-         * 
+         *
          * @return the set of successors
          */
         @Override
-        public SearchStateArc[] getSuccessors()
-        {
+        public SearchStateArc[] getSuccessors() {
             SearchStateArc[] arcs = getCachedSuccessors();
 
-            if (arcs != null)
-            {
+            if (arcs != null) {
                 return arcs;
             }
 
-            if (isFinal())
-            {
+            if (isFinal()) {
                 arcs = EMPTY_ARCS;
-            }
-            else if (node.isEmpty())
-            {
+            } else if (node.isEmpty()) {
                 arcs = getNextGrammarStates(lc, nextBaseID);
-            }
-            else
-            {
+            } else {
                 Word word = node.getWord();
                 Pronunciation[] pronunciations = word.getPronunciations();
 
@@ -715,10 +675,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
 
                 SearchStateArc[] nextArcs = new SearchStateArc[pronunciations.length];
 
-                for (int i = 0; i < pronunciations.length; i++)
-                {
-                    nextArcs[i] = new PronunciationState(this,
-                            pronunciations[i]);
+                for (int i = 0; i < pronunciations.length; i++) {
+                    nextArcs[i] = new PronunciationState(this, pronunciations[i]);
                 }
                 arcs = nextArcs;
             }
@@ -732,19 +690,15 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @param lc         the current left context
          * @param nextBaseID the desired next base ID
-
          */
-        SearchStateArc[] getNextGrammarStates(int lc, int nextBaseID)
-        {
+        SearchStateArc[] getNextGrammarStates(int lc, int nextBaseID) {
             GrammarArc[] nextNodes = node.getSuccessors();
             nextNodes = filter(nextNodes, nextBaseID);
             SearchStateArc[] nextArcs = new SearchStateArc[nextNodes.length];
 
-            for (int i = 0; i < nextNodes.length; i++)
-            {
+            for (int i = 0; i < nextNodes.length; i++) {
                 GrammarArc arc = nextNodes[i];
-                nextArcs[i] = new GrammarState(arc.getGrammarNode(),
-                        arc.getProbability(), lc, nextBaseID);
+                nextArcs[i] = new GrammarState(arc.getGrammarNode(), arc.getProbability(), lc, nextBaseID);
             }
             return nextArcs;
         }
@@ -756,10 +710,9 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the signature
          */
         @Override
-        public String getSignature()
-        {
+        public String getSignature() {
             return "GS " + node + "-lc-";
-            
+
         }
 
         /**
@@ -768,8 +721,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the order
          */
         @Override
-        public int getOrder()
-        {
+        public int getOrder() {
             return 1;
         }
 
@@ -779,55 +731,42 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @param arcs     the set of arcs to filter
          * @param nextBase the ID of the desired next unit
-
          */
-        GrammarArc[] filter(GrammarArc[] arcs, int nextBase)
-        {
+        GrammarArc[] filter(GrammarArc[] arcs, int nextBase) {
             assert nextBase == ANY;
             return arcs;
         }
-        
 
         /**
          * Retain only the pronunciations that start with the unit indicated by
          * nextBase. This method can be used instead of filter to reduce search
          * space. It's not used by default but could potentially lead to a
          * decoding speedup.
-         * 
-         * @param p
-         *            the set of pronunciations to filter
-         * @param nextBase
-         *            the ID of the desired initial unit
+         *
+         * @param p        the set of pronunciations to filter
+         * @param nextBase the ID of the desired initial unit
          */
-        Pronunciation[] filter(Pronunciation[] pronunciations, int nextBase)
-        {
+        Pronunciation[] filter(Pronunciation[] pronunciations, int nextBase) {
 
-            if (nextBase == ANY)
-            {
+            if (nextBase == ANY) {
                 return pronunciations;
             }
 
-            ArrayList<Pronunciation> filteredPronunciation = new ArrayList<Pronunciation>(
-                    pronunciations.length);
-            for (Pronunciation pronunciation : pronunciations)
-            {
-                if (pronunciation.getUnits()[0].getBaseID() == nextBase)
-                {
+            ArrayList<Pronunciation> filteredPronunciation = new ArrayList<Pronunciation>(pronunciations.length);
+            for (Pronunciation pronunciation : pronunciations) {
+                if (pronunciation.getUnits()[0].getBaseID() == nextBase) {
                     filteredPronunciation.add(pronunciation);
                 }
             }
             return filteredPronunciation.toArray(new Pronunciation[filteredPronunciation.size()]);
         }
-        
-
 
         /**
          * Gets the ID of the left context unit for this path
          *
          * @return the left context ID
          */
-        int getLC()
-        {
+        int getLC() {
             return lc;
         }
 
@@ -836,8 +775,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the ID of the next unit
          */
-        int getNextBaseID()
-        {
+        int getNextBaseID() {
             return nextBaseID;
         }
 
@@ -846,8 +784,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the set of IDs of all possible next units
          */
-        int[] getNextUnits()
-        {
+        int[] getNextUnits() {
             return nodeToNextUnitArrayMap.get(node);
         }
 
@@ -857,8 +794,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return a string representation
          */
         @Override
-        public String toString()
-        {
+        public String toString() {
             return node + "["; //+ hmmPool.getUnit(lc) + ',' + hmmPool.getUnit(nextBaseID) + ']';
         }
 
@@ -867,15 +803,13 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the grammar node
          */
-        GrammarNode getGrammarNode()
-        {
+        GrammarNode getGrammarNode() {
             return node;
         }
 
     }
 
-    class InitialState extends FlatSearchState
-    {
+    class InitialState extends FlatSearchState {
 
         private final List<SearchStateArc> nextArcs = new ArrayList<SearchStateArc>();
 
@@ -885,13 +819,11 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the set of successors
          */
         @Override
-        public SearchStateArc[] getSuccessors()
-        {
+        public SearchStateArc[] getSuccessors() {
             return nextArcs.toArray(new SearchStateArc[nextArcs.size()]);
         }
 
-        public void addArc(SearchStateArc arc)
-        {
+        public void addArc(SearchStateArc arc) {
             nextArcs.add(arc);
         }
 
@@ -902,8 +834,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the signature
          */
         @Override
-        public String getSignature()
-        {
+        public String getSignature() {
             return "initialState";
         }
 
@@ -913,8 +844,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the order
          */
         @Override
-        public int getOrder()
-        {
+        public int getOrder() {
             return 1;
         }
 
@@ -924,17 +854,18 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return a string representation
          */
         @Override
-        public String toString()
-        {
+        public String toString() {
             return getSignature();
         }
     }
 
-    /** This class representations a word punctuation in the search graph */
-    class PronunciationState extends FlatSearchState implements WordSearchState
-    {
+    /**
+     * This class representations a word punctuation in the search graph
+     */
+    class PronunciationState extends FlatSearchState implements WordSearchState {
 
         private final GrammarState gs;
+
         private final Pronunciation pronunciation;
 
         /**
@@ -943,8 +874,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param gs the associated grammar state
          * @param p  the pronunciation
          */
-        PronunciationState(GrammarState gs, Pronunciation p)
-        {
+        PronunciationState(GrammarState gs, Pronunciation p) {
             this.gs = gs;
             this.pronunciation = p;
         }
@@ -955,15 +885,10 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the log probability
          */
         @Override
-        public float getInsertionProbability()
-        {
-            if (pronunciation.getWord()
-                .isFiller())
-            {
+        public float getInsertionProbability() {
+            if (pronunciation.getWord().isFiller()) {
                 return LogMath.LOG_ONE;
-            }
-            else
-            {
+            } else {
                 return logWordInsertionProbability;
             }
         }
@@ -974,8 +899,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the hashcode
          */
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return 13 * gs.hashCode() + pronunciation.hashCode();
         }
 
@@ -986,20 +910,13 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return <code>true</code> if the object is equal to this
          */
         @Override
-        public boolean equals(Object o)
-        {
-            if (o == this)
-            {
+        public boolean equals(Object o) {
+            if (o == this) {
                 return true;
-            }
-            else if (o instanceof PronunciationState)
-            {
+            } else if (o instanceof PronunciationState) {
                 PronunciationState other = (PronunciationState) o;
-                return other.gs.equals(gs)
-                        && other.pronunciation.equals(pronunciation);
-            }
-            else
-            {
+                return other.gs.equals(gs) && other.pronunciation.equals(pronunciation);
+            } else {
                 return false;
             }
         }
@@ -1010,16 +927,14 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the successor states
          */
         @Override
-        public SearchStateArc[] getSuccessors()
-        {
+        public SearchStateArc[] getSuccessors() {
             SearchStateArc[] arcs = getCachedSuccessors();
 
-            if (arcs == null)
-            {
+            if (arcs == null) {
                 arcs = getSuccessors(gs.getLC(), 0);
                 cacheSuccessors(arcs);
             }
-            
+
             return arcs;
         }
 
@@ -1030,32 +945,23 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param index the position of the unit within the pronunciation
          * @return the set of sucessor arcs
          */
-        SearchStateArc[] getSuccessors(int lc, int index)
-        {
-            
+        SearchStateArc[] getSuccessors(int lc, int index) {
+
             SearchStateArc[] arcs;
-            if (index == pronunciation.getUnits().length - 1)
-            {
-                if (isContextIndependentUnit(pronunciation.getUnits()[index]))
-                {
+            if (index == pronunciation.getUnits().length - 1) {
+                if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
                     arcs = new SearchStateArc[1];
                     arcs[0] = new OurFullHMMSearchState(this, index, lc, ANY);
-                }
-                else
-                {
+                } else {
                     int[] nextUnits = gs.getNextUnits();
                     arcs = new SearchStateArc[nextUnits.length];
-                    for (int i = 0; i < arcs.length; i++)
-                    {
-                        
-                        arcs[i] = new OurFullHMMSearchState(this, index, lc,
-                                nextUnits[i]);
+                    for (int i = 0; i < arcs.length; i++) {
+
+                        arcs[i] = new OurFullHMMSearchState(this, index, lc, nextUnits[i]);
                     }
                 }
-            }
-            else
-            {
-                arcs = new SearchStateArc[1];             
+            } else {
+                arcs = new SearchStateArc[1];
                 arcs[0] = new OurFullHMMSearchState(this, index, lc);
             }
             return arcs;
@@ -1067,8 +973,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the pronunciation
          */
         @Override
-        public Pronunciation getPronunciation()
-        {
+        public Pronunciation getPronunciation() {
             return pronunciation;
         }
 
@@ -1078,8 +983,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param unit the unit to test
          * @return true if the unit is a context independent unit
          */
-        private boolean isContextIndependentUnit(Unit unit)
-        {
+        private boolean isContextIndependentUnit(Unit unit) {
             return unit.isFiller();
         }
 
@@ -1090,8 +994,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the signature
          */
         @Override
-        public String getSignature()
-        {
+        public String getSignature() {
             return "PS " + gs.getSignature() + '-' + pronunciation;
         }
 
@@ -1101,10 +1004,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return a string representation
          */
         @Override
-        public String toString()
-        {
-            return pronunciation.getWord()
-                .getSpelling();
+        public String toString() {
+            return pronunciation.getWord().getSpelling();
         }
 
         /**
@@ -1113,8 +1014,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the order
          */
         @Override
-        public int getOrder()
-        {
+        public int getOrder() {
             return 2;
         }
 
@@ -1123,8 +1023,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the grammar state
          */
-        GrammarState getGrammarState()
-        {
+        GrammarState getGrammarState() {
             return gs;
         }
 
@@ -1133,25 +1032,26 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * indicates the end of a word.
          *
          * @return true if this WordSearchState indicates the start of a word, false if this WordSearchState indicates
-         *         the end of a word
+         * the end of a word
          */
         @Override
-        public boolean isWordStart()
-        {
+        public boolean isWordStart() {
             return true;
         }
     }
 
-    /** Represents a unit (as an HMM) in the search graph */
-    class OurFullHMMSearchState extends FlatSearchState implements
-            UnitSearchState, ScoreProvider
-    {
+    /**
+     * Represents a unit (as an HMM) in the search graph
+     */
+    class OurFullHMMSearchState extends FlatSearchState implements UnitSearchState, ScoreProvider {
 
         private final PronunciationState pState;
+
         private final int index;
+
         private final boolean isLastUnitOfWord;
 
-        private int numberOfTimesUsed = 0; 
+        private int numberOfTimesUsed = 0;
 
         /**
          * Creates a FullHMMSearchState
@@ -1160,10 +1060,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param which the index of the unit within the pronunciation
          * @param lc    the ID of the left context // können wir ignorieren
          */
-        OurFullHMMSearchState(PronunciationState p, int which, int lc)
-        {
-            this(p, which, lc, p.getPronunciation()
-                .getUnits()[which + 1].getBaseID());
+        OurFullHMMSearchState(PronunciationState p, int which, int lc) {
+            this(p, which, lc, p.getPronunciation().getUnits()[which + 1].getBaseID());
         }
 
         /**
@@ -1174,12 +1072,10 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @param lc    the ID of the left context // können wir ignorieren
          * @param rc    the ID of the right context // können wir ignorieren
          */
-        OurFullHMMSearchState(PronunciationState p, int which, int lc, int rc)
-        {
+        OurFullHMMSearchState(PronunciationState p, int which, int lc, int rc) {
             this.pState = p;
             this.index = which;
-            isLastUnitOfWord = which == p.getPronunciation()
-                .getUnits().length - 1;
+            isLastUnitOfWord = which == p.getPronunciation().getUnits().length - 1;
         }
 
         /**
@@ -1188,20 +1084,14 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the insertion probability
          */
         @Override
-        public float getInsertionProbability()
-        {     
+        public float getInsertionProbability() {
             Unit unit = pState.getPronunciation().getUnits()[index];
 
-            if (unit.isSilence())
-            {
+            if (unit.isSilence()) {
                 return logSilenceInsertionProbability;
-            }
-            else if (unit.isFiller())
-            {
+            } else if (unit.isFiller()) {
                 return logFillerInsertionProbability;
-            }
-            else
-            {
+            } else {
                 return logUnitInsertionProbability;
             }
         }
@@ -1212,9 +1102,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return a string representation
          */
         @Override
-        public String toString()
-        {
-//          return hmm.getUnit().toString();  
+        public String toString() {
+            //          return hmm.getUnit().toString();
             return getUnit().toString();
         }
 
@@ -1224,13 +1113,10 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the hashcode
          */
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             // TODO: maybe improve hash by using AtomicInteger.getNext() from a class variable
-            return pState.getGrammarState()
-                .getGrammarNode()
-                .hashCode() * 29 + pState.getPronunciation()
-                .hashCode() * 19 + index * 7; 
+            return pState.getGrammarState().getGrammarNode().hashCode() * 29 + pState.getPronunciation().hashCode() * 19
+                + index * 7;
         }
 
         /**
@@ -1240,29 +1126,20 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return <code>true</code> if the object is equal to this
          */
         @Override
-        public boolean equals(Object o)
-        {
-            if (o == this)
-            {
+        public boolean equals(Object o) {
+            if (o == this) {
                 return true;
-            }
-            else if (o instanceof OurFullHMMSearchState)
-            {
+            } else if (o instanceof OurFullHMMSearchState) {
                 OurFullHMMSearchState other = (OurFullHMMSearchState) o;
                 // the definition for equal for a FullHMMState:
                 // Grammar Node equal
                 // Pronunciation equal
                 // index equal
                 // rc equal
-                
-                return index == other.index
-                        && pState.getGrammarState()
-                            .getGrammarNode() == other.pState.getGrammarState()
-                            .getGrammarNode()
-                        && pState.getPronunciation() == other.pState.getPronunciation();
-            }
-            else
-            {
+
+                return index == other.index && pState.getGrammarState().getGrammarNode() == other.pState
+                    .getGrammarState().getGrammarNode() && pState.getPronunciation() == other.pState.getPronunciation();
+            } else {
                 return false;
             }
         }
@@ -1273,10 +1150,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the unit
          */
         @Override
-        public Unit getUnit()
-        {      
-            return pState.getPronunciation()
-                .getUnits()[index];
+        public Unit getUnit() {
+            return pState.getPronunciation().getUnits()[index];
         }
 
         /**
@@ -1285,11 +1160,9 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the set of successors
          */
         @Override
-        public SearchStateArc[] getSuccessors()
-        {
+        public SearchStateArc[] getSuccessors() {
             SearchStateArc[] arcs = getCachedSuccessors();
-            if (arcs == null)
-            {
+            if (arcs == null) {
                 SearchStateArc[] localArcs = this.getNextArcs();
                 arcs = new SearchStateArc[localArcs.length + 1];
                 System.arraycopy(localArcs, 0, arcs, 1, localArcs.length);
@@ -1304,8 +1177,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return true if this unit is the last unit of a word
          */
-        boolean isLastUnitOfWord()
-        {
+        boolean isLastUnitOfWord() {
             return isLastUnitOfWord;
         }
 
@@ -1314,28 +1186,18 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the position of the unit within the word
          */
-        HMMPosition getPosition()
-        {
-            int len = pState.getPronunciation()
-                .getUnits().length;
-            if (len == 1)
-            {
+        HMMPosition getPosition() {
+            int len = pState.getPronunciation().getUnits().length;
+            if (len == 1) {
                 return HMMPosition.SINGLE;
-            }
-            else if (index == 0)
-            {
+            } else if (index == 0) {
                 return HMMPosition.BEGIN;
-            }
-            else if (index == len - 1)
-            {
+            } else if (index == len - 1) {
                 return HMMPosition.END;
-            }
-            else
-            {
+            } else {
                 return HMMPosition.INTERNAL;
             }
         }
-        
 
         /**
          * Returns the order of this state type among all of the search states
@@ -1343,8 +1205,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the order
          */
         @Override
-        public int getOrder()
-        {
+        public int getOrder() {
             return 3;
         }
 
@@ -1355,10 +1216,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @return the signature
          */
         @Override
-        public String getSignature()
-        {
-            return "HSS " + pState.getGrammarState()
-                .getGrammarNode() + pState.getPronunciation() + index + '-';
+        public String getSignature() {
+            return "HSS " + pState.getGrammarState().getGrammarNode() + pState.getPronunciation() + index + '-';
         }
 
         /**
@@ -1366,14 +1225,12 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the right context unit ID
          */
-        int getRC()
-        {
+        int getRC() {
             return 0;
         }
 
         @Override
-        public boolean isEmitting()
-        {
+        public boolean isEmitting() {
             return true;
         }
 
@@ -1382,33 +1239,27 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          *
          * @return the next set of arcs
          */
-        SearchStateArc[] getNextArcs()
-        {
+        SearchStateArc[] getNextArcs() {
             SearchStateArc[] arcs;
             // this is the last state of the hmm
             // so check to see if we are at the end
             // of a word, if not get the next full hmm in the word
             // otherwise generate arcs to the next set of words
-               
-            if (!isLastUnitOfWord())
-            {                
+
+            if (!isLastUnitOfWord()) {
                 arcs = pState.getSuccessors(0, index + 1);
-            }
-            else
-            {
+            } else {
                 // we are at the end of the word, so we transit to the
                 // next grammar nodes
-                GrammarState gs = pState.getGrammarState();             
+                GrammarState gs = pState.getGrammarState();
                 arcs = gs.getNextGrammarStates(0, getRC());
             }
             return arcs;
         }
 
         @Override
-        public float getScore(Data data)
-        {
-            String name = pState.getPronunciation()
-                .getUnits()[index].getName();
+        public float getScore(Data data) {
+            String name = pState.getPronunciation().getUnits()[index].getName();
             // TODO: if numberOfTimesUsed != 0 then add a penalty to the score
             numberOfTimesUsed++;
 
@@ -1416,18 +1267,17 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
         }
 
         @Override
-        public float[] getComponentScore(Data feature)
-        {
+        public float[] getComponentScore(Data feature) {
             System.err.println("getComponentScore, looks like we have to implemement something here :(");
             // TODO Auto-generated method stub
             return null;
         }
     }
 
-    
-    /** The search graph that is produced by the flat linguist. */
-    class DynamicFlatSearchGraph implements SearchGraph
-    {
+    /**
+     * The search graph that is produced by the flat linguist.
+     */
+    class DynamicFlatSearchGraph implements SearchGraph {
 
         /*
         * (non-Javadoc)
@@ -1435,12 +1285,11 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
         * @see edu.cmu.sphinx.linguist.SearchGraph#getInitialState()
         */
         @Override
-        public SearchState getInitialState()
-        {
+        public SearchState getInitialState() {
             InitialState initialState = new InitialState();
             initialState.addArc(new GrammarState(grammar.getInitialNode()));
             // add an out-of-grammar branch if configured to do so
-            
+
             return initialState;
         }
 
@@ -1450,14 +1299,12 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable
          * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
          */
         @Override
-        public int getNumStateOrder()
-        {
+        public int getNumStateOrder() {
             return 5;
         }
 
         @Override
-        public boolean getWordTokenFirst()
-        {
+        public boolean getWordTokenFirst() {
             // TODO Auto-generated method stub
             return true;
         }
