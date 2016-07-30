@@ -12,8 +12,8 @@
 package PostProcessor.SphinxBased;
 
 import edu.cmu.sphinx.linguist.WordSequence;
-import edu.cmu.sphinx.linguist.dictionary.Word;
 import edu.cmu.sphinx.linguist.dictionary.Dictionary;
+import edu.cmu.sphinx.linguist.dictionary.Word;
 import edu.cmu.sphinx.linguist.language.grammar.Grammar;
 import edu.cmu.sphinx.linguist.language.grammar.GrammarNode;
 import edu.cmu.sphinx.linguist.language.ngram.LanguageModel;
@@ -34,16 +34,20 @@ import java.util.Set;
  */
 public class LMGrammar extends Grammar {
 
-    /** The property for the language model to be used by this grammar */
+    /**
+     * The property for the language model to be used by this grammar
+     */
     @S4Component(type = LanguageModel.class)
     public final static String PROP_LANGUAGE_MODEL = "languageModel";
+
     // ------------------------
     // Configuration data
     // ------------------------
     private LanguageModel languageModel;
 
-    public LMGrammar(LanguageModel languageModel, boolean showGrammar, boolean optimizeGrammar, boolean addSilenceWords, boolean addFillerWords, Dictionary dictionary) {
-        super(showGrammar,optimizeGrammar,addSilenceWords,addFillerWords,dictionary);
+    public LMGrammar(LanguageModel languageModel, boolean showGrammar, boolean optimizeGrammar, boolean addSilenceWords,
+        boolean addFillerWords, Dictionary dictionary) {
+        super(showGrammar, optimizeGrammar, addSilenceWords, addFillerWords, dictionary);
         this.languageModel = languageModel;
     }
 
@@ -62,7 +66,6 @@ public class LMGrammar extends Grammar {
         languageModel = (LanguageModel) ps.getComponent(PROP_LANGUAGE_MODEL);
     }
 
-
     /**
      * Creates the grammar from the language model. This Grammar contains one word per grammar node. Each word (and
      * grammar node) is connected to all other words with the given probability
@@ -72,7 +75,7 @@ public class LMGrammar extends Grammar {
     @Override
     protected GrammarNode createGrammar() throws IOException {
         languageModel.allocate();
-        TimerPool.getTimer(this,"LMGrammar.create").start();
+        TimerPool.getTimer(this, "LMGrammar.create").start();
         GrammarNode firstNode = null;
         if (languageModel.getMaxDepth() > 2) {
             System.out.println("Warning: LMGrammar  limited to bigrams");
@@ -83,11 +86,9 @@ public class LMGrammar extends Grammar {
         for (String word : words) {
             GrammarNode node = createGrammarNode(word);
             if (node != null && !node.isEmpty()) {
-                if (node.getWord().equals(
-                        getDictionary().getSentenceStartWord())) {
+                if (node.getWord().equals(getDictionary().getSentenceStartWord())) {
                     firstNode = node;
-                } else if (node.getWord().equals(
-                        getDictionary().getSentenceEndWord())) {
+                } else if (node.getWord().equals(getDictionary().getSentenceEndWord())) {
                     node.setFinalNode(true);
                 }
                 nodes.add(node);
@@ -96,49 +97,45 @@ public class LMGrammar extends Grammar {
         if (firstNode == null) {
             throw new Error("No sentence start found in language model");
         }
-//        for (GrammarNode prevNode : nodes) {
-//            // don't add any branches out of the final node
-//            if (prevNode.isFinalNode()) {
-//                continue;
-//            }
-//            for (GrammarNode nextNode : nodes) {
-//                String prevWord = prevNode.getWord().getSpelling();
-//                String nextWord = nextNode.getWord().getSpelling();
-//                Word[] wordArray = {getDictionary().getWord(prevWord),
-//                        getDictionary().getWord(nextWord)};
-//                float logProbability = languageModel
-//                        .getProbability((new WordSequence(wordArray)));
-//                prevNode.add(nextNode, logProbability);
-//            }
-//        }
-        
-      for (GrammarNode prevprevNode : nodes) 
-      {
-          // don't add any branches out of the final node
-          if (prevprevNode.isFinalNode()) 
-          {
-              continue;
-          }
-          for (GrammarNode prevNode : nodes) 
-          {
-              if (prevNode.isFinalNode()) 
-              {
-                  continue;
-              }
-              for (GrammarNode nextNode : nodes)
-              {
-                  String prevprevWord = prevprevNode.getWord().getSpelling();
-                  String prevWord = prevNode.getWord().getSpelling();
-                  String nextWord = nextNode.getWord().getSpelling();
-                  Word[] wordArray = {getDictionary().getWord(prevprevWord),getDictionary().getWord(prevWord),getDictionary().getWord(nextWord)};
-                  float logProbability = languageModel.getProbability((new WordSequence(wordArray)));
-                  prevNode.add(nextNode, logProbability);
-              }
+        //        for (GrammarNode prevNode : nodes) {
+        //            // don't add any branches out of the final node
+        //            if (prevNode.isFinalNode()) {
+        //                continue;
+        //            }
+        //            for (GrammarNode nextNode : nodes) {
+        //                String prevWord = prevNode.getWord().getSpelling();
+        //                String nextWord = nextNode.getWord().getSpelling();
+        //                Word[] wordArray = {getDictionary().getWord(prevWord),
+        //                        getDictionary().getWord(nextWord)};
+        //                float logProbability = languageModel
+        //                        .getProbability((new WordSequence(wordArray)));
+        //                prevNode.add(nextNode, logProbability);
+        //            }
+        //        }
 
-          }
-      }
-        
-        TimerPool.getTimer(this,"LMGrammar.create").stop();
+        for (GrammarNode prevprevNode : nodes) {
+            // don't add any branches out of the final node
+            if (prevprevNode.isFinalNode()) {
+                continue;
+            }
+            for (GrammarNode prevNode : nodes) {
+                if (prevNode.isFinalNode()) {
+                    continue;
+                }
+                for (GrammarNode nextNode : nodes) {
+                    String prevprevWord = prevprevNode.getWord().getSpelling();
+                    String prevWord = prevNode.getWord().getSpelling();
+                    String nextWord = nextNode.getWord().getSpelling();
+                    Word[] wordArray = {getDictionary().getWord(prevprevWord), getDictionary().getWord(prevWord),
+                        getDictionary().getWord(nextWord)};
+                    float logProbability = languageModel.getProbability((new WordSequence(wordArray)));
+                    prevNode.add(nextNode, logProbability);
+                }
+
+            }
+        }
+
+        TimerPool.getTimer(this, "LMGrammar.create").stop();
         languageModel.deallocate();
         return firstNode;
     }

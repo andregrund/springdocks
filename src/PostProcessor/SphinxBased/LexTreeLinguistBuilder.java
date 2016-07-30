@@ -6,20 +6,35 @@ import edu.cmu.sphinx.linguist.dictionary.Dictionary;
 import edu.cmu.sphinx.linguist.language.ngram.LanguageModel;
 
 public class LexTreeLinguistBuilder {
+
     private AcousticModel acousticModel;
+
     private UnitManager unitManager;
+
     private LanguageModel languageModel;
+
     private Dictionary dictionary;
+
     private boolean fullWordHistories;
+
     private boolean wantUnigramSmear;
+
     private double wordInsertionProbability;
+
     private double silenceInsertionProbability;
+
     private double fillerInsertionProbability;
+
     private double unitInsertionProbability;
+
     private float languageWeight;
+
     private boolean addFillerWords;
+
     private boolean generateUnitStates;
+
     private float unigramSmearWeight;
+
     private int maxArcCacheSize;
 
     public LexTreeLinguistBuilder acousticModel(final AcousticModel acousticModel) {
@@ -98,6 +113,9 @@ public class LexTreeLinguistBuilder {
     }
 
     public LexTreeLinguist createLexTreeLinguist() {
-        return new LexTreeLinguist(acousticModel, unitManager, languageModel, dictionary, fullWordHistories, wantUnigramSmear, wordInsertionProbability, silenceInsertionProbability, fillerInsertionProbability, unitInsertionProbability, languageWeight, addFillerWords, generateUnitStates, unigramSmearWeight, maxArcCacheSize);
+        return new LexTreeLinguist(acousticModel, unitManager, languageModel, dictionary, fullWordHistories,
+            wantUnigramSmear, wordInsertionProbability, silenceInsertionProbability, fillerInsertionProbability,
+            unitInsertionProbability, languageWeight, addFillerWords, generateUnitStates, unigramSmearWeight,
+            maxArcCacheSize);
     }
 }
