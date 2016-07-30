@@ -60,7 +60,6 @@ import java.util.logging.Logger;
  * <p/>
  * Note that all probabilities are maintained in the log math domain
  */
-
 public class OurDynamicFlatLinguist implements Linguist, Configurable {
 
     /**
@@ -108,6 +107,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
     // ----------------------------------
     // Subcomponents that are configured
     // by the property sheet
+    //
+    //
     // -----------------------------------
     private Grammar grammar;
 
@@ -194,7 +195,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
 
     /*
     * (non-{
-public class DynamicFlatLinguist Javadoc)
+    public class DynamicFlatLinguist Javadoc)
     *
     * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
     */
@@ -655,7 +656,6 @@ public class DynamicFlatLinguist Javadoc)
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-
             SearchStateArc[] arcs = getCachedSuccessors();
 
             if (arcs != null) {
@@ -712,6 +712,7 @@ public class DynamicFlatLinguist Javadoc)
         @Override
         public String getSignature() {
             return "GS " + node + "-lc-";
+
         }
 
         /**
@@ -928,10 +929,12 @@ public class DynamicFlatLinguist Javadoc)
         @Override
         public SearchStateArc[] getSuccessors() {
             SearchStateArc[] arcs = getCachedSuccessors();
+
             if (arcs == null) {
                 arcs = getSuccessors(gs.getLC(), 0);
                 cacheSuccessors(arcs);
             }
+
             return arcs;
         }
 
@@ -943,6 +946,7 @@ public class DynamicFlatLinguist Javadoc)
          * @return the set of sucessor arcs
          */
         SearchStateArc[] getSuccessors(int lc, int index) {
+
             SearchStateArc[] arcs;
             if (index == pronunciation.getUnits().length - 1) {
                 if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
@@ -952,6 +956,7 @@ public class DynamicFlatLinguist Javadoc)
                     int[] nextUnits = gs.getNextUnits();
                     arcs = new SearchStateArc[nextUnits.length];
                     for (int i = 0; i < arcs.length; i++) {
+
                         arcs[i] = new OurFullHMMSearchState(this, index, lc, nextUnits[i]);
                     }
                 }
@@ -1103,6 +1108,7 @@ public class DynamicFlatLinguist Javadoc)
          */
         @Override
         public String toString() {
+            //          return hmm.getUnit().toString();
             return getUnit().toString();
         }
 
@@ -1282,6 +1288,7 @@ public class DynamicFlatLinguist Javadoc)
             InitialState initialState = new InitialState();
             initialState.addArc(new GrammarState(grammar.getInitialNode()));
             // add an out-of-grammar branch if configured to do so
+
             return initialState;
         }
 
@@ -1291,14 +1298,13 @@ public class DynamicFlatLinguist Javadoc)
         }
 
         /*
-                 * (non-Javadoc)
-                 *
-                 * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
-                 */
+         * (non-Javadoc)
+         *
+         * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
+         */
         @Override
         public int getNumStateOrder() {
             return 5;
         }
     }
 }
-

@@ -193,11 +193,11 @@ public class MyLexTreeLinguist {
 
     private int maxDepth;
 
+    private HMMTree hmmTree;
+
     private int cacheTrys;
 
     private int cacheHits;
-
-    private HMMTree hmmTree;
 
     public MyLexTreeLinguist(AcousticModel acousticModel, UnitManager unitManager, LanguageModel languageModel,
         Dictionary dictionary, boolean fullWordHistories, boolean wantUnigramSmear, double wordInsertionProbability,
@@ -231,6 +231,7 @@ public class MyLexTreeLinguist {
     }
 
     public MyLexTreeLinguist() {
+
     }
 
     /*
@@ -1480,4 +1481,5 @@ public class MyLexTreeLinguist {
     private UnitNode[] getHMMNodes(EndNode endNode) {
         return hmmTree.getHMMNodes(endNode);
     }
+
 }
