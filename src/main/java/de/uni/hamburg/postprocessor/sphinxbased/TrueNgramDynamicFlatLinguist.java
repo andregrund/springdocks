@@ -67,31 +67,31 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      * The property used to define the grammar to use when building the search graph
      */
     @S4Component(type = Grammar.class)
-    private final static String GRAMMAR = "grammar";
+    private static final String GRAMMAR = "grammar";
 
     /**
      * The property used to define the unit manager to use when building the search graph
      */
     @S4Component(type = UnitManager.class)
-    private final static String UNIT_MANAGER = "unitManager";
+    private static final String UNIT_MANAGER = "unitManager";
 
     /**
      * The property used to define the acoustic model to use when building the search graph
      */
     @S4Component(type = AcousticModel.class)
-    private final static String ACOUSTIC_MODEL = "acousticModel";
+    private static final String ACOUSTIC_MODEL = "acousticModel";
 
     /**
      * The property that specifies whether to add a branch for detecting out-of-grammar utterances.
      */
     @S4Boolean(defaultValue = false)
-    private final static String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
+    private static final String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
 
     /**
      * The property for the probability of entering the out-of-grammar branch.
      */
     @S4Double(defaultValue = 1.0)
-    private final static String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
+    private static final String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
 
     /**
      * The property for the probability of inserting a CI phone in the out-of-grammar ci phone loop
@@ -103,19 +103,19 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      * The property for the acoustic model to use to build the phone loop that detects out of grammar utterances.
      */
     @S4Component(type = AcousticModel.class)
-    private final static String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
+    private static final String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
 
     /**
      * The property for the language model to be used by this grammar
      */
     @S4Component(type = LanguageModel.class)
-    private final static String PROP_LANGUAGE_MODEL = "languageModel";
+    private static final String PROP_LANGUAGE_MODEL = "languageModel";
 
     /**
      * The property that defines the dictionary to use for this grammar
      */
     @S4Component(type = Dictionary.class)
-    private final static String PROP_DICTIONARY = "dictionary";
+    private static final String PROP_DICTIONARY = "dictionary";
 
     // ----------------------------------
     // Subcomponents that are configured
@@ -162,7 +162,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
     private Logger logger;
 
-    SearchStateArc outOfGrammarGraph;
+    private SearchStateArc outOfGrammarGraph;
 
     private GrammarNode initialGrammarState;
 
@@ -790,7 +790,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
                 return pronunciations;
             }
 
-            ArrayList<Pronunciation> filteredPronunciation = new ArrayList<Pronunciation>(pronunciations.length);
+            List<Pronunciation> filteredPronunciation = new ArrayList<Pronunciation>(pronunciations.length);
             for (Pronunciation pronunciation : pronunciations) {
                 if (pronunciation.getUnits()[0].getBaseID() == nextBase) {
                     filteredPronunciation.add(pronunciation);
@@ -969,14 +969,11 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-
             SearchStateArc[] arcs = getCachedSuccessors();
-
             if (arcs == null) {
                 arcs = getSuccessors(gs.getLC(), 0);
                 cacheSuccessors(arcs);
             }
-
             return arcs;
         }
 
@@ -988,22 +985,16 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @return the set of sucessor arcs
          */
         private SearchStateArc[] getSuccessors(int lc, int index) {
-
             SearchStateArc[] arcs;
-
             if (index == pronunciation.getUnits().length - 1) {
                 if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
-
                     arcs = new SearchStateArc[1];
                     arcs[0] = new OurFullHMMSearchState(this, index, lc, ANY, wordSequence.trim(maxDepth - 1));
 
                 } else {
-
                     int[] nextUnits = gs.getNextUnits();
-
                     arcs = new SearchStateArc[nextUnits.length];
                     for (int i = 0; i < arcs.length; i++) {
-
                         arcs[i] = new OurFullHMMSearchState(this, index, lc, nextUnits[i],
                             wordSequence.trim(maxDepth - 1));
                     }
@@ -1155,7 +1146,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String toString() {
-            //          return hmm.getUnit().toString();
             return getUnit().toString();
         }
 
@@ -1328,7 +1318,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
         @Override
         public float[] getComponentScore(Data feature) {
             System.err.println("getComponentScore, looks like we have to implemement something here :(");
-            // TODO Auto-generated method stub
             return null;
         }
     }
@@ -1355,8 +1344,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
         /*
          * (non-Javadoc)
-         * 
-         * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder(
+         *
+         * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
          */
         @Override
         public int getNumStateOrder() {
@@ -1365,9 +1354,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
         @Override
         public boolean getWordTokenFirst() {
-            // TODO Auto-generated method stub
             return true;
         }
     }
-
 }
