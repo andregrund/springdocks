@@ -32,6 +32,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import java.util.List;
 import java.util.Scanner;
 
 import javax.xml.bind.JAXBException;
@@ -82,7 +83,7 @@ public class PhonemeCreator {
 		
 		if(r==null) return null;
 
-		ArrayList<String> rawResults = r.getResultList();
+		List<String> rawResults = r.getResultList();
 		
 		ArrayList<PhonemeContainer> resultsWithPhonemes = new ArrayList<PhonemeContainer>();
 		Printer.printWithTimeF(TAG, "created lists");

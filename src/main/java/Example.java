@@ -28,6 +28,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -219,7 +221,7 @@ class Example
         // file like wtm_experiment.sentences.txt
 
         //String configname = "wtm_experiment";
-        String configname = "config/elpmaxe/elpmaxe";
+        String configname = "config/andre/elpmaxe";
 
         // initialize some recognizers
         System.out.println("Starting Raw Google");
@@ -259,36 +261,36 @@ class Example
         // the reference text
         String sentence = "there is a door in the back";
         // play sound before recognition
-        playSound(filename);
+        //playSound(filename);
         // recognize
         testFile(filename, sentence, rawGoogle, sentencelist, sphinxNGram,
                 sphinxSentences, sphinxPostProcessorBigram,
                 sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
                 wordlist);
 
-        waitForEnter();
+        //waitForEnter();
 
         filename = "data/front_fs_1387379085134_m1.wav";
         sentence = "the door is in front of you";
-        playSound(filename);
+        //playSound(filename);
         testFile(filename, sentence, rawGoogle, sentencelist, sphinxNGram,
                 sphinxSentences, sphinxPostProcessorBigram,
                 sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
                 wordlist);
-        waitForEnter();
+        //waitForEnter();
         filename = "data/home_fs_1387379071054_m1.wav";
 
         sentence = "the kitchen is at home";
-        playSound(filename);
+        //playSound(filename);
         testFile(filename, sentence, rawGoogle, sentencelist, sphinxNGram,
                 sphinxSentences, sphinxPostProcessorBigram,
                 sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
                 wordlist);
-        waitForEnter();
+        //waitForEnter();
 
         filename = "data/show_fs_1387385878857_m1.wav";
         sentence = "robot show me the pen";
-        playSound(filename);
+        //playSound(filename);
         testFile(filename, sentence, rawGoogle, sentencelist, sphinxNGram,
                 sphinxSentences, sphinxPostProcessorBigram,
                 sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
@@ -299,7 +301,7 @@ class Example
     {
 
         // define config name
-        String configname = "config/elpmaxe/elpmaxe";
+        String configname = "config/andre/elpmaxe";
 
         // load google
         System.out.println("Starting Raw Google");
@@ -368,7 +370,7 @@ class Example
 //        testWER(1.67f,4.12f);
         
         //creates a the configuration data and the language model from a .batch file
-        createConf("/informatik2/students/home/1strauss/BachelorArbeit/Dataset/delete/delete.batch", "delete");
+//        createConf("/informatik2/students/home/1strauss/BachelorArbeit/Dataset/delete/delete.batch", "delete");
 //        createConf("/informatik2/students/home/1strauss/BachelorArbeit/Dataset/CrossValidation/Scripted/Test/heinrichLab_L2test.batch", "scripted_test2");
 //        createConf("/informatik2/students/home/1strauss/BachelorArbeit/Dataset/CrossValidation/Scripted/Test/heinrichLab_L3test.batch", "scripted_test3");
 //        createConf("/informatik2/students/home/1strauss/BachelorArbeit/Dataset/CrossValidation/Scripted/Test/heinrichLab_L4test.batch", "scripted_test4");
@@ -403,7 +405,7 @@ class Example
 
 
         //        TestSupervisor.matlabFormatPerformance();    
-        if (true) return;
+//        if (true) return;
 
         // set verbose to false
         Printer.verbose = false;
@@ -416,7 +418,7 @@ class Example
         String key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw";
 
         //starts the simulation example
-        String configname = "config/elpmaxe/elpmaxe";
+        String configname = "config/andre/elpmaxe";
 
         // initialize some recognizers
         System.out.println("Starting Raw Google");
@@ -433,34 +435,45 @@ class Example
         String filename = "data/back_fs_1387386033021_m1.wav";
         // the reference text
         // play sound before recognition
-        playSound(filename);
+        //playSound(filename);
         // recognize
 
-        Result r = null;
-        r = rawGoogle.recognizeFromFile(filename);
+//        Result result = null;
+//        result = rawGoogle.recognizeFromFile(filename);
 
-        if (r != null)
+        // mock Google call for door in the back
+        Result result = new Result();
+        final List<String> results = new ArrayList<>();
+        results.add("theres a door in the bag");
+        results.add("theres a door in the back");
+        results.add("theres a door in the bed");
+        results.add("theres a boy in the back");
+        results.add("theres a door in a bag");
+        result.getResultList().addAll(results);
+        result.setConfidence(0.901311f);
+
+        if (result != null)
         {
             // print out result
-            String hypRawGoogle = r.getBestResult();
+            String hypRawGoogle = result.getBestResult();
             System.out.println("Raw Google: " + hypRawGoogle);
 
-            r = new Result();
-            r.addResult(hypRawGoogle);
+            result = new Result();
+            result.addResult(hypRawGoogle);
             // recognize from google result
-            r = sphinxPostProcessorTrigram.recognizeFromResult(r);
-            if (r != null)
+            result = sphinxPostProcessorTrigram.recognizeFromResult(result);
+            if (result != null)
             {
-                String hypSphinxPostProcessorTrigram = r.getBestResult();
+                String hypSphinxPostProcessorTrigram = result.getBestResult();
                 System.out.println("Google+Sphinx Unigram: "
                         + hypSphinxPostProcessorTrigram);
             }
         }
-        r = sphinxNGram.recognizeFromFile(filename);
-        if (r != null)
+        result = sphinxNGram.recognizeFromFile(filename);
+        if (result != null)
         {
             // print out result
-            String hypSphinx = r.getBestResult();
+            String hypSphinx = result.getBestResult();
             System.out.println("Raw Google: " + hypSphinx);
         }
 
@@ -490,7 +503,7 @@ class Example
         // recognize from file
 
         String filename = "data/169rec.wav";
-        //        playSound(filename);
+        //playSound(filename);
         Result r;
         r = rawGoogle.recognizeFromFile(filename);
 
@@ -638,7 +651,7 @@ class Example
         Printer.verbose = false;
 
         //starts the simulation example
-        String configname = "config/minitimit/minitimit";
+        String configname = "config/andre/elpmaxe";
         //        String configname = "config/elpmaxe/elpmaxe";
         
         final NISTAlign alignerrefshyp = new NISTAlign(true, true);

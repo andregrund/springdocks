@@ -1313,11 +1313,15 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
         @Override
         public float getScore(Data data) {
-            String name = pronunciationState.getPronunciation().getUnits()[index].getName();
+            final Pronunciation pronunciation = pronunciationState.getPronunciation();
+            final Unit[] units = pronunciation.getUnits();
+            final Unit unit = units[index];
+            String name = unit.getName();
             // TODO: if numberOfTimesUsed != 0 then add a penalty to the score
             numberOfTimesUsed++;
 
-            return ((PhoneData) data).getConfusionScore(name, numberOfTimesUsed);
+            final float confusionScore = ((PhoneData) data).getConfusionScore(name, numberOfTimesUsed);
+            return confusionScore;
         }
 
         @Override
