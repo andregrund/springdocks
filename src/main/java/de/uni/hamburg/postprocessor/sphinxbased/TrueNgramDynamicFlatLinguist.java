@@ -1356,7 +1356,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
         /*
          * (non-Javadoc)
          * 
-         * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
+         * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder(
          */
         @Override
         public int getNumStateOrder() {
