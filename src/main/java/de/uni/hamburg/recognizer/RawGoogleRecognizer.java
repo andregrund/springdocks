@@ -2,18 +2,24 @@ package de.uni.hamburg.recognizer;
 
 import de.uni.hamburg.data.Result;
 import de.uni.hamburg.utils.Printer;
+import javaFlacEncoder.FLACFileWriter;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 
 /**
  * DOCKS is a framework for post-processing results of Cloud-based speech
@@ -45,8 +51,12 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
     private String key;
 
+    public RawGoogleRecognizer(final String key) {
+        this.key = key;
+    }
+
     @Override
-    public Result recognizeFromResult(final Result r) {
+    public Result recognizeFromResult(final Result result) {
         return null;
     }
 
@@ -110,7 +120,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
     }
 
     //get result from an open connection to Google
-    private Result getResult(HttpURLConnection connection) {
+    private Result getResult(final HttpURLConnection connection) {
         BufferedReader in = null;
         Printer.printWithTime(TAG, "receiving inputstream");
         try {
@@ -179,6 +189,51 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
     }
 
+    /**
+     * recognize from an audio inpustream like the voice activity detector
+     *
+     * @param audioStream e.g. the voice activity detector
+     * @return a result containing 10-best list
+     */
+    public Result recognize(AudioInputStream audioStream) {
+        //get connection to google
+        HttpURLConnection con = getConnection();
+
+        //get stream from connection
+        DataOutputStream stream = getStream(con);
+
+        Printer.printWithTime(TAG, "starting AudioInput");
+
+        Printer.printWithTime(TAG, " AudioInput started");
+
+        //write to stream
+        writeToStream(stream, audioStream);
+
+        //get result
+        Result res = getResult(con);
+
+        //flush and close the stream
+        try {
+            stream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Printer.printWithTime(TAG, "closing");
+
+        try {
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //disconnect from google
+        con.disconnect();
+
+        Printer.printWithTime(TAG, "Done");
+
+        return res;
+    }
+
     private static AudioFormat getAudioFormat() {
         float sampleRate = 16000;
         int sampleSizeInBits = 16;
@@ -186,6 +241,111 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         boolean signed = true;
         boolean bigEndian = false;
         return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
+    }
+
+    private HttpURLConnection getConnection() {
+        HttpURLConnection connection = null;
+        //		Printer.printWithTime(TAG, "creating URL");
+
+        String request = "https://www.google.com/speech-api/v2/recognize?"
+            + "xjerr=1&client=chromium&lang=en-US&maxresults=10&pfilter=0&key=" + key + "&output=json";
+        URL url = null;
+        try {//create new request
+            url = new URL(request);
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //		Printer.printWithTime(TAG, "creating http connection");
+        try {//open connection
+            connection = (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        //adjust the connection
+        //		Printer.printWithTime(TAG, "adjusting connection");
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.setInstanceFollowRedirects(false);
+        try {
+            connection.setRequestMethod("POST");
+        } catch (ProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        connection.setRequestProperty("Content-Type", "audio/x-flac; rate=16000");
+        connection.setRequestProperty("User-Agent",
+            "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36");
+        connection.setConnectTimeout(60000);
+        connection.setUseCaches(false);
+
+        return connection;
+
+    }
+
+    private DataOutputStream getStream(HttpURLConnection connection) {
+        DataOutputStream stream = null;
+        try {
+            stream = new DataOutputStream(connection.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stream;
+    }
+
+    private void writeToStream(DataOutputStream stream, AudioInputStream audioStream) {
+        int buffer_size = 4000;
+        byte tempBuffer[] = new byte[buffer_size];
+
+        Printer.printWithTime(TAG, "buffer size: " + buffer_size);
+
+        boolean run = true;
+        int i = 0;
+        InputStream byteInputStream;
+        FLACFileWriter ffw = new FLACFileWriter();
+        ByteArrayOutputStream boas = new ByteArrayOutputStream();
+        ByteArrayOutputStream boas2 = new ByteArrayOutputStream();
+        AudioInputStream ais;
+        Printer.printWithTime(TAG, "recording started");
+        while (run) {
+            int cnt = -1;
+            try {//read data from the audio input stream
+                cnt = audioStream.read(tempBuffer, 0, buffer_size);
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            Printer.printWithTimeF(TAG, "read :" + cnt);
+            if (cnt > 0) {//if there is data
+                Printer.reset();
+
+                byteInputStream = new ByteArrayInputStream(tempBuffer);
+                ais = new AudioInputStream(byteInputStream, getAudioFormat(), cnt); //open a new audiostream
+                try {
+                    ffw.write(ais, FLACFileWriter.FLAC, boas);//convert audio data to FLAC
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Printer.printWithTimeF(TAG,
+                    "boas size: " + boas.size() + " i: " + i + " cnt: " + cnt + " boas content: " + new String(
+                        boas.toByteArray()));
+                Printer.printWithTimeF(TAG, "writing data");
+                try {
+                    stream.write(boas.toByteArray());//write FLAC audio data to the output stream to google
+                    boas2.write(tempBuffer);
+                    boas.reset();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } else
+                run = false;
+        }
+        Printer.printWithTime(TAG, "recording stopped");
+
     }
 
 }

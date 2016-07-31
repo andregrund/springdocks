@@ -1,6 +1,7 @@
 package de.uni.hamburg.data;
 
 import de.uni.hamburg.phoneme.PhonemeSubstitution;
+import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.util.LogMath;
 
 /**
@@ -28,13 +29,13 @@ import edu.cmu.sphinx.util.LogMath;
  * Contact:
  * 7twiefel@informatik.uni-hamburg.de
  */
-public class PhoneData {
+public class PhoneData implements Data {
 
     /**
      *
      */
     private String phoneID;
-    private static LogMath logMath = LogMath.getLogMath();
+    private static LogMath logMath =  LogMath.getLogMath();
     private int method;
 
     /**
@@ -44,6 +45,8 @@ public class PhoneData {
     public PhoneData(String phoneID, int method) {
         this.phoneID = phoneID;
         this.method = method;
+
+
 
 
     }
@@ -58,7 +61,8 @@ public class PhoneData {
         return logMath.linearToLog(PhonemeSubstitution.getInstance(method).getScore(phoneID, otherPhone));
     }
 
-    public String toString() {
+    public String toString()
+    {
         return phoneID;
     }
 }
