@@ -1,5 +1,6 @@
 package de.uni.hamburg.data;
 
+import de.uni.hamburg.phoneme.PhonemeSubstitution;
 import edu.cmu.sphinx.util.LogMath;
 
 /**
@@ -32,9 +33,9 @@ public class PhoneData {
     /**
      *
      */
-    String phoneID;
-    static LogMath logMath = LogMath.getLogMath();
-    int method;
+    private String phoneID;
+    private static LogMath logMath = LogMath.getLogMath();
+    private int method;
 
     /**
      * @param phoneID the phoneme representation
