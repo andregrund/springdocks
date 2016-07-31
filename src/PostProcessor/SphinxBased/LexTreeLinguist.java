@@ -468,8 +468,10 @@ public class LexTreeLinguist implements Linguist {
      */
     public void stopRecognition() {
         // FIXME: remove
-        if (languageModel instanceof LargeNGramModel)
-            ((LargeNGramModel) languageModel).stop();
+        if (languageModel instanceof LargeNGramModel) {
+            // do nothing
+            //            ((LargeNGramModel) languageModel).stop();
+        }
     }
 
     /**

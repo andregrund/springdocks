@@ -1,19 +1,19 @@
+package PostProcessor.SphinxBased;
 /*
- * Copyright 1999-2002 Carnegie Mellon University.  
- * Portions Copyright 2002 Sun Microsystems, Inc.  
+ * Copyright 1999-2002 Carnegie Mellon University.
+ * Portions Copyright 2002 Sun Microsystems, Inc.
  * Portions Copyright 2002 Mitsubishi Electric Research Laboratories.
  * All Rights Reserved.  Use is subject to license terms.
- * 
+ *
  * See the file "license.terms" for information on usage and
- * redistribution of this file, and for a DISCLAIMER OF ALL 
+ * redistribution of this file, and for a DISCLAIMER OF ALL
  * WARRANTIES.
- * Modified by Johannes Twiefel
+ *
  */
-package PostProcessor.SphinxBased;
 
-import Data.PhoneData;
 import edu.cmu.sphinx.decoder.scorer.ScoreProvider;
 import edu.cmu.sphinx.frontend.Data;
+import edu.cmu.sphinx.linguist.HMMSearchState;
 import edu.cmu.sphinx.linguist.Linguist;
 import edu.cmu.sphinx.linguist.SearchGraph;
 import edu.cmu.sphinx.linguist.SearchState;
@@ -22,16 +22,19 @@ import edu.cmu.sphinx.linguist.UnitSearchState;
 import edu.cmu.sphinx.linguist.WordSearchState;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.AcousticModel;
+import edu.cmu.sphinx.linguist.acoustic.HMM;
+import edu.cmu.sphinx.linguist.acoustic.HMMPool;
 import edu.cmu.sphinx.linguist.acoustic.HMMPosition;
+import edu.cmu.sphinx.linguist.acoustic.HMMState;
+import edu.cmu.sphinx.linguist.acoustic.HMMStateArc;
 import edu.cmu.sphinx.linguist.acoustic.Unit;
 import edu.cmu.sphinx.linguist.acoustic.UnitManager;
-import edu.cmu.sphinx.linguist.dictionary.Dictionary;
+import edu.cmu.sphinx.linguist.dflat.OutOfGrammarGraph;
 import edu.cmu.sphinx.linguist.dictionary.Pronunciation;
 import edu.cmu.sphinx.linguist.dictionary.Word;
 import edu.cmu.sphinx.linguist.language.grammar.Grammar;
 import edu.cmu.sphinx.linguist.language.grammar.GrammarArc;
 import edu.cmu.sphinx.linguist.language.grammar.GrammarNode;
-import edu.cmu.sphinx.linguist.language.ngram.LanguageModel;
 import edu.cmu.sphinx.util.LogMath;
 import edu.cmu.sphinx.util.Timer;
 import edu.cmu.sphinx.util.TimerPool;
@@ -62,7 +65,8 @@ import java.util.logging.Logger;
  * <p/>
  * Note that all probabilities are maintained in the log math domain
  */
-public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
+
+public class AndresDynamicFlatLinguist implements Linguist, Configurable {
 
     /**
      * The property used to define the grammar to use when building the search graph
@@ -106,26 +110,10 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     @S4Component(type = AcousticModel.class)
     public final static String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
 
-    /**
-     * The property for the language model to be used by this grammar
-     */
-    @S4Component(type = LanguageModel.class)
-    public final static String PROP_LANGUAGE_MODEL = "languageModel";
-
-    /**
-     * The property that defines the dictionary to use for this grammar
-     */
-    @S4Component(type = Dictionary.class)
-    public final static String PROP_DICTIONARY = "dictionary";
-
     // ----------------------------------
     // Subcomponents that are configured
     // by the property sheet
-    //
-    //
     // -----------------------------------
-    private LanguageModel languageModel;
-
     private Grammar grammar;
 
     private AcousticModel acousticModel;
@@ -133,6 +121,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     private AcousticModel phoneLoopAcousticModel;
 
     private LogMath logMath;
+
+    private UnitManager unitManager;
 
     // ------------------------------------
     // Data that is configured by the
@@ -148,7 +138,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
     private float languageWeight;
 
-    @SuppressWarnings("unused")
     private float logOutOfGrammarBranchProbability;
 
     private float logPhoneInsertionProbability;
@@ -163,13 +152,11 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
     private Logger logger;
 
+    private HMMPool hmmPool;
+
     SearchStateArc outOfGrammarGraph;
 
     private GrammarNode initialGrammarState;
-
-    private Dictionary dictionary;
-
-    private int maxDepth;
 
     // this map is used to manage the set of follow on units for a
     // particular grammar node. It is used to select the set of
@@ -186,18 +173,16 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     // an empty arc (just waiting for Noah, I guess)
     private final SearchStateArc[] EMPTY_ARCS = new SearchStateArc[0];
 
-    public TrueNgramDynamicFlatLinguist(AcousticModel acousticModel, Grammar grammar, double wordInsertionProbability,
-        double silenceInsertionProbability, double unitInsertionProbability, double fillerInsertionProbability,
-        float languageWeight, boolean addOutOfGrammarBranch, double outOfGrammarBranchProbability,
-        double phoneInsertionProbability, AcousticModel phoneLoopAcousticModel, Dictionary dictionary,
-        LanguageModel languageModel) {
+    public AndresDynamicFlatLinguist(AcousticModel acousticModel, Grammar grammar, UnitManager unitManager,
+        double wordInsertionProbability, double silenceInsertionProbability, double unitInsertionProbability,
+        double fillerInsertionProbability, float languageWeight, boolean addOutOfGrammarBranch,
+        double outOfGrammarBranchProbability, double phoneInsertionProbability, AcousticModel phoneLoopAcousticModel) {
 
         this.logger = Logger.getLogger(getClass().getName());
         this.acousticModel = acousticModel;
         logMath = LogMath.getLogMath();
         this.grammar = grammar;
-        this.dictionary = dictionary;
-        this.languageModel = languageModel;
+        this.unitManager = unitManager;
 
         this.logWordInsertionProbability = logMath.linearToLog(wordInsertionProbability);
         this.logSilenceInsertionProbability = logMath.linearToLog(silenceInsertionProbability);
@@ -213,25 +198,21 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
         }
     }
 
-    public TrueNgramDynamicFlatLinguist() {
+    public AndresDynamicFlatLinguist() {
     }
 
     /*
-    * (non-{
-    public class DynamicFlatLinguist Javadoc)
+    * (non-Javadoc)
     *
     * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
     */
-    @Override
     public void newProperties(PropertySheet ps) throws PropertyException {
-        // hookup to all of the components
         logger = ps.getLogger();
-        acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
-        languageModel = (LanguageModel) ps.getComponent(PROP_LANGUAGE_MODEL);
-        dictionary = (Dictionary) ps.getComponent(PROP_DICTIONARY);
-
         logMath = LogMath.getLogMath();
+
+        acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
         grammar = (Grammar) ps.getComponent(GRAMMAR);
+        unitManager = (UnitManager) ps.getComponent(UNIT_MANAGER);
 
         // get the rest of the configuration data
         logWordInsertionProbability = logMath.linearToLog(ps.getDouble(PROP_WORD_INSERTION_PROBABILITY));
@@ -253,26 +234,15 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      *
      * @return the search graph
      */
-    @Override
     public SearchGraph getSearchGraph() {
         return searchGraph;
     }
 
-    /**
-     * Sets up the acoustic model.
-     *
-     * @param ps the PropertySheet from which to obtain the acoustic model
-     * @throws edu.cmu.sphinx.util.props.PropertyException
-     */
-    protected void setupAcousticModel(PropertySheet ps) throws PropertyException {
-        acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
-    }
-
-    @Override
     public void allocate() throws IOException {
         logger.info("Allocating DFLAT");
         allocateAcousticModel();
         grammar.allocate();
+        hmmPool = new HMMPool(acousticModel, logger, unitManager);
         nodeToNextUnitArrayMap = new HashMap<GrammarNode, int[]>();
         nodeToUnitSetMap = new HashMap<GrammarNode, Set<Unit>>();
         Timer timer = TimerPool.getTimer(this, "compileGrammar");
@@ -285,8 +255,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     /**
      * Allocates the acoustic model.
      *
-     * @throws java.io.IOException
-     */
+     * @throws java.io.IOException if error happens
+     **/
     protected void allocateAcousticModel() throws IOException {
         acousticModel.allocate();
         if (addOutOfGrammarBranch) {
@@ -299,7 +269,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     *
     * @see edu.cmu.sphinx.linguist.Linguist#deallocate()
     */
-    @Override
     public void deallocate() {
         if (acousticModel != null) {
             acousticModel.deallocate();
@@ -310,7 +279,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     /**
      * Called before a recognition
      */
-    @Override
     public void startRecognition() {
         if (grammarHasChanged()) {
             compileGrammar();
@@ -320,7 +288,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     /**
      * Called after a recognition
      */
-    @Override
     public void stopRecognition() {
     }
 
@@ -344,7 +311,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
     private void compileGrammar() {
         initialGrammarState = grammar.getInitialNode();
-        maxDepth = languageModel.getMaxDepth();
 
         for (GrammarNode node : grammar.getGrammarNodes()) {
             initUnitMaps(node);
@@ -438,7 +404,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the set of successors
          */
-        @Override
         public abstract SearchStateArc[] getSuccessors();
 
         /**
@@ -447,7 +412,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the signature
          */
-        @Override
         public abstract String getSignature();
 
         /**
@@ -455,7 +419,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the order
          */
-        @Override
         public abstract int getOrder();
 
         /**
@@ -463,7 +426,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return true if this is an emitting state
          */
-        @Override
         public boolean isEmitting() {
             return false;
         }
@@ -473,7 +435,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return true if this is a final state
          */
-        @Override
         public boolean isFinal() {
             return false;
         }
@@ -483,7 +444,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the lex state (null for this linguist)
          */
-        @Override
         public Object getLexState() {
             return null;
         }
@@ -493,7 +453,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the formatted string
          */
-        @Override
         public String toPrettyString() {
             return toString();
         }
@@ -513,7 +472,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the word history (null for this linguist)
          */
-        @Override
         public WordSequence getWordHistory() {
             return null;
         }
@@ -523,7 +481,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the successor state
          */
-        @Override
         public SearchState getState() {
             return this;
         }
@@ -533,7 +490,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the log probability
          */
-        @Override
         public float getProbability() {
             return getLanguageProbability() + getInsertionProbability();
         }
@@ -543,7 +499,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the log probability
          */
-        @Override
         public float getLanguageProbability() {
             return LogMath.LOG_ONE;
         }
@@ -553,7 +508,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the log probability
          */
-        @Override
         public float getInsertionProbability() {
             return LogMath.LOG_ONE;
         }
@@ -583,8 +537,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      */
     class GrammarState extends FlatSearchState {
 
-        private final WordSequence wordSequence;
-
         private final GrammarNode node;
 
         private final int lc;
@@ -598,8 +550,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @param node the grammar node
          */
-        GrammarState(GrammarNode node, WordSequence wordSequence) {
-            this(node, LogMath.LOG_ONE, UnitManager.SILENCE.getBaseID(), wordSequence);
+        GrammarState(GrammarNode node) {
+            this(node, LogMath.LOG_ONE, UnitManager.SILENCE.getBaseID());
         }
 
         /**
@@ -609,8 +561,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @param languageProbability the probability of transistioning to this word
          * @param lc                  the left context for this path
          */
-        GrammarState(GrammarNode node, float languageProbability, int lc, WordSequence wordSequence) {
-            this(node, languageProbability, lc, ANY, wordSequence);
+        GrammarState(GrammarNode node, float languageProbability, int lc) {
+            this(node, languageProbability, lc, ANY);
         }
 
         /**
@@ -621,8 +573,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @param lc                  the left context for this path
          * @param nextBaseID          the next base ID
          */
-        GrammarState(GrammarNode node, float languageProbability, int lc, int nextBaseID, WordSequence wordSequence) {
-            this.wordSequence = wordSequence;
+        GrammarState(GrammarNode node, float languageProbability, int lc, int nextBaseID) {
             this.lc = lc;
             this.nextBaseID = nextBaseID;
             this.node = node;
@@ -662,15 +613,10 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
                 return true;
             } else if (o instanceof GrammarState) {
                 GrammarState other = (GrammarState) o;
-                return other.node == node && lc == other.lc && nextBaseID == other.nextBaseID && wordSequence
-                    .equals(other.wordSequence);
+                return other.node == node && lc == other.lc && nextBaseID == other.nextBaseID;
             } else {
                 return false;
             }
-        }
-
-        public WordSequence getWordHistory() {
-            return wordSequence;
         }
 
         /**
@@ -690,6 +636,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
+
             SearchStateArc[] arcs = getCachedSuccessors();
 
             if (arcs != null) {
@@ -710,7 +657,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
                 SearchStateArc[] nextArcs = new SearchStateArc[pronunciations.length];
 
                 for (int i = 0; i < pronunciations.length; i++) {
-                    nextArcs[i] = new PronunciationState(this, pronunciations[i], wordSequence.trim(maxDepth - 1));
+                    nextArcs[i] = new PronunciationState(this, pronunciations[i]);
                 }
                 arcs = nextArcs;
             }
@@ -732,12 +679,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
 
             for (int i = 0; i < nextNodes.length; i++) {
                 GrammarArc arc = nextNodes[i];
-                Word nextWord = arc.getGrammarNode().getWord();
-                WordSequence nextWordSequence = wordSequence.addWord(nextWord, maxDepth);
-                float probability = languageModel.getProbability(nextWordSequence);
-
-                nextArcs[i] = new GrammarState(arc.getGrammarNode(), probability, lc, nextBaseID,
-                    nextWordSequence.trim(maxDepth - 1));
+                nextArcs[i] = new GrammarState(arc.getGrammarNode(), arc.getProbability(), lc, nextBaseID);
             }
             return nextArcs;
         }
@@ -750,8 +692,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String getSignature() {
-            return "GS " + node + "-lc-" + wordSequence;
-
+            return "GS " + node + "-lc-" + hmmPool.getUnit(lc) + "-rc-" + hmmPool.getUnit(nextBaseID);
         }
 
         /**
@@ -772,8 +713,28 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @param nextBase the ID of the desired next unit
          */
         GrammarArc[] filter(GrammarArc[] arcs, int nextBase) {
-            assert nextBase == ANY;
+            if (nextBase != ANY) {
+                List<GrammarArc> list = new ArrayList<GrammarArc>();
+                for (GrammarArc arc : arcs) {
+                    GrammarNode node = arc.getGrammarNode();
+                    if (hasEntryContext(node, nextBase)) {
+                        list.add(arc);
+                    }
+                }
+                arcs = list.toArray(new GrammarArc[list.size()]);
+            }
             return arcs;
+        }
+
+        /**
+         * Determines if the given node starts with the specified unit
+         *
+         * @param node   the grammar node
+         * @param unitID the id of the unit
+         */
+        private boolean hasEntryContext(GrammarNode node, int unitID) {
+            Set<Unit> unitSet = nodeToUnitSetMap.get(node);
+            return unitSet.contains(hmmPool.getUnit(unitID));
         }
 
         /**
@@ -782,8 +743,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * space. It's not used by default but could potentially lead to a
          * decoding speedup.
          *
-         * @param pronunciations        the set of pronunciations to filter
-         * @param nextBase the ID of the desired initial unit
+         * @param pronunciations the set of pronunciations to filter
+         * @param nextBase       the ID of the desired initial unit
          */
         Pronunciation[] filter(Pronunciation[] pronunciations, int nextBase) {
 
@@ -834,7 +795,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String toString() {
-            return node + "{" + wordSequence + "}";
+            return node + "[" + hmmPool.getUnit(lc) + ',' + hmmPool.getUnit(nextBaseID) + ']';
         }
 
         /**
@@ -903,8 +864,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      */
     class PronunciationState extends FlatSearchState implements WordSearchState {
 
-        private final WordSequence wordSequence;
-
         private final GrammarState gs;
 
         private final Pronunciation pronunciation;
@@ -915,8 +874,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @param gs the associated grammar state
          * @param p  the pronunciation
          */
-        PronunciationState(GrammarState gs, Pronunciation p, WordSequence wordsequence) {
-            this.wordSequence = wordsequence;
+        PronunciationState(GrammarState gs, Pronunciation p) {
             this.gs = gs;
             this.pronunciation = p;
         }
@@ -970,14 +928,11 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-
             SearchStateArc[] arcs = getCachedSuccessors();
-
             if (arcs == null) {
                 arcs = getSuccessors(gs.getLC(), 0);
                 cacheSuccessors(arcs);
             }
-
             return arcs;
         }
 
@@ -989,29 +944,21 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @return the set of sucessor arcs
          */
         SearchStateArc[] getSuccessors(int lc, int index) {
-
             SearchStateArc[] arcs;
-
             if (index == pronunciation.getUnits().length - 1) {
                 if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
-
                     arcs = new SearchStateArc[1];
-                    arcs[0] = new OurFullHMMSearchState(this, index, lc, ANY, wordSequence.trim(maxDepth - 1));
-
+                    arcs[0] = new FullHMMSearchState(this, index, lc, ANY);
                 } else {
-
                     int[] nextUnits = gs.getNextUnits();
-
                     arcs = new SearchStateArc[nextUnits.length];
                     for (int i = 0; i < arcs.length; i++) {
-
-                        arcs[i] = new OurFullHMMSearchState(this, index, lc, nextUnits[i],
-                            wordSequence.trim(maxDepth - 1));
+                        arcs[i] = new FullHMMSearchState(this, index, lc, nextUnits[i]);
                     }
                 }
             } else {
                 arcs = new SearchStateArc[1];
-                arcs[0] = new OurFullHMMSearchState(this, index, lc, wordSequence.trim(maxDepth - 1));
+                arcs[0] = new FullHMMSearchState(this, index, lc);
             }
             return arcs;
         }
@@ -1021,7 +968,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the pronunciation
          */
-        @Override
         public Pronunciation getPronunciation() {
             return pronunciation;
         }
@@ -1083,7 +1029,6 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @return true if this WordSearchState indicates the start of a word, false if this WordSearchState indicates
          * the end of a word
          */
-        @Override
         public boolean isWordStart() {
             return true;
         }
@@ -1092,42 +1037,48 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
     /**
      * Represents a unit (as an HMM) in the search graph
      */
-    class OurFullHMMSearchState extends FlatSearchState implements UnitSearchState, ScoreProvider {
+    class FullHMMSearchState extends FlatSearchState implements UnitSearchState {
 
-        private final WordSequence wordSequence;
-
-        private final PronunciationState pronunciationState;
+        private final PronunciationState pState;
 
         private final int index;
 
-        private final boolean isLastUnitOfWord;
+        private final int lc;
 
-        private int numberOfTimesUsed = 0;
+        private final int rc;
+
+        private final HMM hmm;
+
+        private final boolean isLastUnitOfWord;
 
         /**
          * Creates a FullHMMSearchState
          *
          * @param p     the parent PronunciationState
          * @param which the index of the unit within the pronunciation
-         * @param lc    the ID of the left context // können wir ignorieren
+         * @param lc    the ID of the left context
          */
-        OurFullHMMSearchState(PronunciationState p, int which, int lc, WordSequence wordSequence) {
-            this(p, which, lc, p.getPronunciation().getUnits()[which + 1].getBaseID(), wordSequence);
+        FullHMMSearchState(PronunciationState p, int which, int lc) {
+            this(p, which, lc, p.getPronunciation().getUnits()[which + 1].getBaseID());
         }
 
         /**
          * Creates a FullHMMSearchState
          *
-         * @param pronunciationState     the parent PronunciationState
+         * @param p     the parent PronunciationState
          * @param which the index of the unit within the pronunciation
-         * @param lc    the ID of the left context // können wir ignorieren
-         * @param rc    the ID of the right context // können wir ignorieren
+         * @param lc    the ID of the left context
+         * @param rc    the ID of the right context
          */
-        OurFullHMMSearchState(PronunciationState pronunciationState, int which, int lc, int rc, WordSequence wordSequence) {
-            this.wordSequence = wordSequence;
-            this.pronunciationState = pronunciationState;
+        FullHMMSearchState(PronunciationState p, int which, int lc, int rc) {
+            this.pState = p;
             this.index = which;
-            isLastUnitOfWord = which == pronunciationState.getPronunciation().getUnits().length - 1;
+            this.lc = lc;
+            this.rc = rc;
+            int base = p.getPronunciation().getUnits()[which].getBaseID();
+            int id = hmmPool.buildID(base, lc, rc);
+            hmm = hmmPool.getHMM(id, getPosition());
+            isLastUnitOfWord = which == p.getPronunciation().getUnits().length - 1;
         }
 
         /**
@@ -1137,7 +1088,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public float getInsertionProbability() {
-            Unit unit = pronunciationState.getPronunciation().getUnits()[index];
+            Unit unit = hmm.getBaseUnit();
 
             if (unit.isSilence()) {
                 return logSilenceInsertionProbability;
@@ -1155,8 +1106,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String toString() {
-            //          return hmm.getUnit().toString();
-            return getUnit().toString();
+            return hmm.getUnit().toString();
         }
 
         /**
@@ -1166,9 +1116,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public int hashCode() {
-            // TODO: maybe improve hash by using AtomicInteger.getNext() from a class variable
-            return pronunciationState.getGrammarState().getGrammarNode().hashCode() * 29 + pronunciationState.getPronunciation().hashCode() * 19
-                + index * 7;
+            return pState.getGrammarState().getGrammarNode().hashCode() * 29 + pState.getPronunciation().hashCode() * 19
+                + index * 7 + 43 * lc + rc;
         }
 
         /**
@@ -1181,18 +1130,17 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
-            } else if (o instanceof OurFullHMMSearchState) {
-                OurFullHMMSearchState other = (OurFullHMMSearchState) o;
+            } else if (o instanceof FullHMMSearchState) {
+                FullHMMSearchState other = (FullHMMSearchState) o;
                 // the definition for equal for a FullHMMState:
                 // Grammar Node equal
                 // Pronunciation equal
                 // index equal
                 // rc equal
 
-                return index == other.index && pronunciationState
-                    .getGrammarState().getGrammarNode() == other.pronunciationState
-                    .getGrammarState().getGrammarNode() && pronunciationState
-                    .getPronunciation() == other.pronunciationState.getPronunciation();
+                return pState.getGrammarState().getGrammarNode() == other.pState.getGrammarState().getGrammarNode()
+                    && pState.getPronunciation() == other.pState.getPronunciation() && index == other.index
+                    && lc == other.lc && rc == other.rc;
             } else {
                 return false;
             }
@@ -1203,9 +1151,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the unit
          */
-        @Override
         public Unit getUnit() {
-            return pronunciationState.getPronunciation().getUnits()[index];
+            return hmm.getBaseUnit();
         }
 
         /**
@@ -1215,14 +1162,12 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-            SearchStateArc[] arcs;
-
-            SearchStateArc[] localArcs = this.getNextArcs();
-            arcs = new SearchStateArc[localArcs.length + 1];
-            System.arraycopy(localArcs, 0, arcs, 1, localArcs.length);
-            arcs[0] = this;
-            cacheSuccessors(arcs);
-
+            SearchStateArc[] arcs = getCachedSuccessors();
+            if (arcs == null) {
+                arcs = new SearchStateArc[1];
+                arcs[0] = new HMMStateSearchState(this, hmm.getInitialState());
+                cacheSuccessors(arcs);
+            }
             return arcs;
         }
 
@@ -1241,7 +1186,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @return the position of the unit within the word
          */
         HMMPosition getPosition() {
-            int len = pronunciationState.getPronunciation().getUnits().length;
+            int len = pState.getPronunciation().getUnits().length;
             if (len == 1) {
                 return HMMPosition.SINGLE;
             } else if (index == 0) {
@@ -1251,6 +1196,15 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
             } else {
                 return HMMPosition.INTERNAL;
             }
+        }
+
+        /**
+         * Returns the HMM for this state
+         *
+         * @return the HMM
+         */
+        HMM getHMM() {
+            return hmm;
         }
 
         /**
@@ -1271,7 +1225,8 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String getSignature() {
-            return "HSS " + pronunciationState.getGrammarState().getGrammarNode() + pronunciationState.getPronunciation() + index + '-';
+            return "HSS " + pState.getGrammarState().getGrammarNode() + pState.getPronunciation() + index + '-' + rc
+                + '-' + lc;
         }
 
         /**
@@ -1280,12 +1235,7 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
          * @return the right context unit ID
          */
         int getRC() {
-            return 0;
-        }
-
-        @Override
-        public boolean isEmitting() {
-            return true;
+            return rc;
         }
 
         /**
@@ -1300,31 +1250,164 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
             // of a word, if not get the next full hmm in the word
             // otherwise generate arcs to the next set of words
 
+            //            Pronunciation pronunciation = pState.getPronunciation();
+            int nextLC = getHMM().getBaseUnit().getBaseID();
+
             if (!isLastUnitOfWord()) {
-                arcs = pronunciationState.getSuccessors(0, index + 1);
+                arcs = pState.getSuccessors(nextLC, index + 1);
             } else {
                 // we are at the end of the word, so we transit to the
                 // next grammar nodes
-                GrammarState gs = pronunciationState.getGrammarState();
-                arcs = gs.getNextGrammarStates(0, getRC());
+                GrammarState gs = pState.getGrammarState();
+                arcs = gs.getNextGrammarStates(nextLC, getRC());
+            }
+            return arcs;
+        }
+    }
+
+    /**
+     * Represents a single hmm state in the search graph
+     */
+    class HMMStateSearchState extends FlatSearchState implements HMMSearchState, ScoreProvider {
+
+        private final FullHMMSearchState fullHMMSearchState;
+
+        private final HMMState hmmState;
+
+        private final float probability;
+
+        /**
+         * Creates an HMMStateSearchState
+         *
+         * @param hss      the parent hmm state
+         * @param hmmState which hmm state
+         */
+        HMMStateSearchState(FullHMMSearchState hss, HMMState hmmState) {
+            this(hss, hmmState, LogMath.LOG_ONE);
+        }
+
+        /**
+         * Creates an HMMStateSearchState
+         *
+         * @param hss      the parent hmm state
+         * @param hmmState which hmm state
+         * @param prob     the transition probability
+         */
+        HMMStateSearchState(FullHMMSearchState hss, HMMState hmmState, float prob) {
+            this.probability = prob;
+            fullHMMSearchState = hss;
+            this.hmmState = hmmState;
+        }
+
+        /**
+         * Returns the acoustic probability for this state
+         *
+         * @return the probability
+         */
+        @Override
+        public float getInsertionProbability() {
+            return probability;
+        }
+
+        /**
+         * Generate a hashcode for an object
+         *
+         * @return the hashcode
+         */
+        @Override
+        public int hashCode() {
+            return 7 * fullHMMSearchState.hashCode() + hmmState.hashCode();
+        }
+
+        /**
+         * Determines if the given object is equal to this object
+         *
+         * @param o the object to test
+         * @return <code>true</code> if the object is equal to this
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            } else if (o instanceof HMMStateSearchState) {
+                HMMStateSearchState other = (HMMStateSearchState) o;
+                return other.fullHMMSearchState.equals(fullHMMSearchState) && other.hmmState.equals(hmmState);
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * Determines if this state is an emitting state
+         *
+         * @return true if this is an emitting state
+         */
+        @Override
+        public boolean isEmitting() {
+            return hmmState.isEmitting();
+        }
+
+        /**
+         * Gets the set of successors for this state
+         *
+         * @return the set of successors
+         */
+        @Override
+        public SearchStateArc[] getSuccessors() {
+
+            SearchStateArc[] arcs = getCachedSuccessors();
+            if (arcs == null) {
+                if (hmmState.isExitState()) {
+                    arcs = fullHMMSearchState.getNextArcs();
+                } else {
+                    HMMStateArc[] next = hmmState.getSuccessors();
+                    arcs = new SearchStateArc[next.length];
+                    for (int i = 0; i < arcs.length; i++) {
+                        arcs[i] = new HMMStateSearchState(fullHMMSearchState, next[i].getHMMState(),
+                            next[i].getLogProbability());
+                    }
+                }
+                cacheSuccessors(arcs);
             }
             return arcs;
         }
 
+        /**
+         * Returns the order of this state type among all of the search states
+         *
+         * @return the order
+         */
         @Override
-        public float getScore(Data data) {
-            String name = pronunciationState.getPronunciation().getUnits()[index].getName();
-            // TODO: if numberOfTimesUsed != 0 then add a penalty to the score
-            numberOfTimesUsed++;
-
-            return ((PhoneData) data).getConfusionScore(name, numberOfTimesUsed);
+        public int getOrder() {
+            return isEmitting() ? 4 : 0;
         }
 
+        /**
+         * Returns a unique string representation of the state. This string is suitable (and typically used) for a label
+         * for a GDL node
+         *
+         * @return the signature
+         */
         @Override
-        public float[] getComponentScore(Data feature) {
-            System.err.println("getComponentScore, looks like we have to implemement something here :(");
-            // TODO Auto-generated method stub
-            return null;
+        public String getSignature() {
+            return "HSSS " + fullHMMSearchState.getSignature() + '-' + hmmState;
+        }
+
+        /**
+         * Returns the hmm state for this search state
+         *
+         * @return the hmm state
+         */
+        public HMMState getHMMState() {
+            return hmmState;
+        }
+
+        public float getScore(Data data) {
+            return hmmState.getScore(data);
+        }
+
+        public float[] getComponentScore(Data data) {
+            return hmmState.calculateComponentScore(data);
         }
     }
 
@@ -1338,29 +1421,29 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
         *
         * @see edu.cmu.sphinx.linguist.SearchGraph#getInitialState()
         */
-        @Override
         public SearchState getInitialState() {
             InitialState initialState = new InitialState();
-            initialState.addArc(new GrammarState(grammar.getInitialNode(),
-                (new WordSequence(dictionary.getSentenceStartWord()).trim(maxDepth - 1))));
+            initialState.addArc(new GrammarState(grammar.getInitialNode()));
             // add an out-of-grammar branch if configured to do so
+            if (addOutOfGrammarBranch) {
+                OutOfGrammarGraph oogg = new OutOfGrammarGraph(phoneLoopAcousticModel, logOutOfGrammarBranchProbability,
+                    logPhoneInsertionProbability);
 
+                initialState.addArc(oogg.getOutOfGrammarGraph());
+            }
             return initialState;
         }
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see edu.cmu.sphinx.linguist.SearchGraph#getNumStateOrder()
          */
-        @Override
         public int getNumStateOrder() {
             return 5;
         }
 
-        @Override
         public boolean getWordTokenFirst() {
-            // TODO Auto-generated method stub
             return true;
         }
     }

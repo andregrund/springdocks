@@ -948,12 +948,16 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         SearchStateArc[] getSuccessors(int lc, int index) {
 
             SearchStateArc[] arcs;
+
             if (index == pronunciation.getUnits().length - 1) {
                 if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
+
                     arcs = new SearchStateArc[1];
                     arcs[0] = new OurFullHMMSearchState(this, index, lc, ANY);
                 } else {
+
                     int[] nextUnits = gs.getNextUnits();
+
                     arcs = new SearchStateArc[nextUnits.length];
                     for (int i = 0; i < arcs.length; i++) {
 
