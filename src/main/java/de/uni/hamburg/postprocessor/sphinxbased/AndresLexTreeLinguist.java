@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class LexTreeLinguist implements Linguist {
+public class AndresLexTreeLinguist implements Linguist {
 
     /**
      * The property that defines the grammar to use when building the search graph
@@ -185,7 +185,7 @@ public class LexTreeLinguist implements Linguist {
 
     private int cacheHits;
 
-    public LexTreeLinguist(AcousticModel acousticModel, UnitManager unitManager, LanguageModel languageModel,
+    public AndresLexTreeLinguist(AcousticModel acousticModel, UnitManager unitManager, LanguageModel languageModel,
         Dictionary dictionary, boolean fullWordHistories, boolean wantUnigramSmear, double wordInsertionProbability,
         double silenceInsertionProbability, double fillerInsertionProbability, double unitInsertionProbability,
         float languageWeight, boolean addFillerWords, boolean generateUnitStates, float unigramSmearWeight,
@@ -216,7 +216,7 @@ public class LexTreeLinguist implements Linguist {
         }
     }
 
-    public LexTreeLinguist() {
+    public AndresLexTreeLinguist() {
 
     }
 

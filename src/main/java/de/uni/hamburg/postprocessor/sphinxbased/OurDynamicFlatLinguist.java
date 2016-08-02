@@ -709,7 +709,6 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         @Override
         public String getSignature() {
             return "GS " + node + "-lc-";
-
         }
 
         /**
@@ -1251,11 +1250,15 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
 
         @Override
         public float getScore(Data data) {
-            String name = pState.getPronunciation().getUnits()[index].getName();
+            final Pronunciation pronunciation = pState.getPronunciation();
+            final Unit[] units = pronunciation.getUnits();
+            final Unit unit = units[index];
+            final String name = unit.getName();
             // TODO: if numberOfTimesUsed != 0 then add a penalty to the score
             numberOfTimesUsed++;
 
-            return ((PhoneData) data).getConfusionScore(name, numberOfTimesUsed);
+            final float confusionScore = ((PhoneData) data).getConfusionScore(name, numberOfTimesUsed);
+            return confusionScore;
         }
 
         @Override

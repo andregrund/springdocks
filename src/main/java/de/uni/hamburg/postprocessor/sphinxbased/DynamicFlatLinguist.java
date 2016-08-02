@@ -385,7 +385,7 @@ public class DynamicFlatLinguist implements Linguist, Configurable {
         }
     }
 
-    private Map<SearchState, SearchStateArc[]> successorCache = new HashMap<SearchState, SearchStateArc[]>();
+    private Map<SearchState, SearchStateArc[]> successorCache = new HashMap<>();
 
     /**
      * The base search state for this dynamic flat linguist.
@@ -504,6 +504,7 @@ public class DynamicFlatLinguist implements Linguist, Configurable {
          *
          * @return the log probability
          */
+        @Override
         public float getLanguageProbability() {
             return LogMath.LOG_ONE;
         }
