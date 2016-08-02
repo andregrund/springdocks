@@ -598,7 +598,7 @@ public class AndresLexTreeLinguist implements Linguist {
          * @param previous previous state
          * @return the search state for the wordNode
          */
-        protected SearchStateArc createWordStateArc(WordNode wordNode, HMMNode lastUnit, LexTreeState previous) {
+        protected SearchStateArc createWordStateArc(WordNode wordNode, UnitNode lastUnit, LexTreeState previous) {
             // System.out.println("CWSA " + wordNode + " fup " + fixupProb);
             float languageProbability = logOne;
             Word nextWord = wordNode.getWord();
@@ -1189,7 +1189,7 @@ public class AndresLexTreeLinguist implements Linguist {
      */
     public class LexTreeWordState extends LexTreeState implements WordSearchState {
 
-        private HMMNode lastNode;
+        private UnitNode lastNode;
 
         private float logLanguageProbability;
 
@@ -1200,7 +1200,7 @@ public class AndresLexTreeLinguist implements Linguist {
          * @param wordSequence        the sequence of words triphone context
          * @param languageProbability the probability of this word
          */
-        LexTreeWordState(WordNode wordNode, HMMNode lastNode, WordSequence wordSequence, float smearTerm,
+        LexTreeWordState(WordNode wordNode, UnitNode lastNode, WordSequence wordSequence, float smearTerm,
             float smearProb, float languageProbability) {
 
             super(wordNode, wordSequence, smearTerm, smearProb);
@@ -1348,7 +1348,7 @@ public class AndresLexTreeLinguist implements Linguist {
          * @param wordSequence   the sequence of words triphone context
          * @param logProbability the probability of this word occurring
          */
-        LexTreeEndWordState(WordNode wordNode, HMMNode lastNode, WordSequence wordSequence, float smearTerm,
+        LexTreeEndWordState(WordNode wordNode, UnitNode lastNode, WordSequence wordSequence, float smearTerm,
             float smearProb, float logProbability) {
             super(wordNode, lastNode, wordSequence, smearTerm, smearProb, logProbability);
         }
