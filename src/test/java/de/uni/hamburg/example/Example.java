@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ class Example {
     private static void testFile(String filename, String sentence, RawGoogleRecognizer rawGoogleRecognizer,
         SentencelistPoprivate static final long serialVersionUID=1650789290776731090L;
 
-        private ArrayList<String>resultList=new ArrayList<String>();
+        private List<String>resultList=new ArrayList<String>();
 
     private float confidence;
 
