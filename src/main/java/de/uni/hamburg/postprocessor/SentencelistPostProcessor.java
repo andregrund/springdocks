@@ -71,14 +71,14 @@ public class SentencelistPostProcessor implements StandardRecognizer {
 
     public SentencelistPostProcessor(String sentenceFile, int numberOfResults, String key) {
         googleRecognizer = new RawGoogleRecognizer(key);
-        Printer.printWithTime(TAG, "loading phoneme database");
+        Printer.printWithTime(TAG, "loading phoneme database", );
         pc = new PhonemeCreator(sentenceFile);
-        Printer.printWithTime(TAG, "getting phonemes for speech result");
+        Printer.printWithTime(TAG, "getting phonemes for speech result", );
         ls = new Levenshtein();
         phonemesGrammar = pc.pdb.getArrayContent();
         this.numberOfResults = numberOfResults;
         referenceRecognizer = -1;
-        Printer.printWithTime(TAG, "SentencelistPostProcessor created");
+        Printer.printWithTime(TAG, "SentencelistPostProcessor created", );
     }
 
     /**
@@ -92,13 +92,13 @@ public class SentencelistPostProcessor implements StandardRecognizer {
         List<PhonemeContainer> phonemesSpeech = pc.getPhonemes(result);
 
         if (phonemesSpeech != null) {
-            Printer.printWithTime(TAG, "calculating levenshtein distances");
+            Printer.printWithTime(TAG, "calculating levenshtein distances", );
 
             int minDist = 10000;
 
             int tempResult = -1;
 
-            Printer.printWithTime(TAG, "phonemesGrammar.size: " + phonemesGrammar.size());
+            Printer.printWithTime(TAG, "phonemesGrammar.size: " + phonemesGrammar.size(), );
 
             //if one tempResult is preferred
             if (numberOfResults == 1) {
@@ -118,7 +118,7 @@ public class SentencelistPostProcessor implements StandardRecognizer {
                     }
                 }
 
-                Printer.printWithTime(TAG, "tempResult is : " + tempResult);
+                Printer.printWithTime(TAG, "tempResult is : " + tempResult, );
                 //return sentence with the minimal distance
                 //phonemesGrammar.get(tempResult).print();
                 result = new Result();

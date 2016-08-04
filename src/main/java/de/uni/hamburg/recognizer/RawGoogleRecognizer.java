@@ -62,6 +62,9 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
     @Override
     public Result recognizeFromFile(final String fileName) {
+
+        final boolean verbose = false;
+        final Printer printer = new Printer();
         //open connection to google
         HttpURLConnection con = getConnection();
 
@@ -93,7 +96,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Printer.printWithTime(TAG, "closing");
+        printer.printWithTime(TAG, "closing", verbose);
 
         try {
             stream.close();
@@ -104,7 +107,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
         //disconnect from google
         con.disconnect();
-        Printer.printWithTime(TAG, "Done");
+        printer.printWithTime(TAG, "Done", verbose);
         // res.print();
         return res;
     }
@@ -121,8 +124,11 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
     //get result from an open connection to Google
     private Result getResult(final HttpURLConnection connection) {
-        BufferedReader in = null;
-        Printer.printWithTime(TAG, "receiving inputstream");
+        BufferedReader in;
+
+        final boolean verbose = false;
+        final Printer printer = new Printer();
+        printer.printWithTime(TAG, "receiving inputstream", verbose);
         try {
             //get result stream from connection
             in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -132,11 +138,11 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         }
         String decodedString = "";
         String resultJSON = null;
-        Printer.printWithTime(TAG, "decoding string");
+        printer.printWithTime(TAG, "decoding string", verbose);
         try {
             //get JSON result
             while ((decodedString = in.readLine()) != null) {
-                Printer.printWithTime(TAG, decodedString);
+                printer.printWithTime(TAG, decodedString, verbose);
                 resultJSON = decodedString;
             }
         } catch (IOException e) {
@@ -144,7 +150,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
             return null;
         }
         if (resultJSON == null) {
-            Printer.printWithTime(TAG, "no JSON result");
+            printer.printWithTime(TAG, "no JSON result", verbose);
             return null;
         }
 
@@ -196,15 +202,19 @@ public class RawGoogleRecognizer implements StandardRecognizer {
      * @return a result containing 10-best list
      */
     public Result recognize(AudioInputStream audioStream) {
+
+        final boolean verbose = false;
+
+        final Printer printer = new Printer();
         //get connection to google
         HttpURLConnection con = getConnection();
 
         //get stream from connection
         DataOutputStream stream = getStream(con);
 
-        Printer.printWithTime(TAG, "starting AudioInput");
+        printer.printWithTime(TAG, "starting AudioInput", verbose);
 
-        Printer.printWithTime(TAG, " AudioInput started");
+        printer.printWithTime(TAG, " AudioInput started", verbose);
 
         //write to stream
         writeToStream(stream, audioStream);
@@ -218,7 +228,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Printer.printWithTime(TAG, "closing");
+        printer.printWithTime(TAG, "closing", verbose);
 
         try {
             stream.close();
@@ -229,7 +239,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         //disconnect from google
         con.disconnect();
 
-        Printer.printWithTime(TAG, "Done");
+        printer.printWithTime(TAG, "Done", verbose);
 
         return res;
     }
@@ -245,7 +255,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
 
     private HttpURLConnection getConnection() {
         HttpURLConnection connection = null;
-        //		Printer.printWithTime(TAG, "creating URL");
+        //		printer.printWithTime(TAG, "creating URL");
 
         String request = "https://www.google.com/speech-api/v2/recognize?"
             + "xjerr=1&client=chromium&lang=en-US&maxresults=10&pfilter=0&key=" + key + "&output=json";
@@ -256,7 +266,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        //		Printer.printWithTime(TAG, "creating http connection");
+        //		printer.printWithTime(TAG, "creating http connection");
         try {//open connection
             connection = (HttpURLConnection) url.openConnection();
         } catch (IOException e) {
@@ -265,7 +275,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         }
 
         //adjust the connection
-        //		Printer.printWithTime(TAG, "adjusting connection");
+        //		printer.printWithTime(TAG, "adjusting connection");
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setInstanceFollowRedirects(false);
@@ -299,7 +309,10 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         int buffer_size = 4000;
         byte tempBuffer[] = new byte[buffer_size];
 
-        Printer.printWithTime(TAG, "buffer size: " + buffer_size);
+        final boolean verbose = false;
+        final Printer printer = new Printer();
+
+        printer.printWithTime(TAG, "buffer size: " + buffer_size, verbose);
 
         boolean run = true;
         int i = 0;
@@ -308,7 +321,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
         ByteArrayOutputStream boas = new ByteArrayOutputStream();
         ByteArrayOutputStream boas2 = new ByteArrayOutputStream();
         AudioInputStream ais;
-        Printer.printWithTime(TAG, "recording started");
+        printer.printWithTime(TAG, "recording started", verbose);
         while (run) {
             int cnt = -1;
             try {//read data from the audio input stream
@@ -317,9 +330,9 @@ public class RawGoogleRecognizer implements StandardRecognizer {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-            Printer.printWithTimeF(TAG, "read :" + cnt);
+            printer.printWithTimeF(TAG, "read :" + cnt);
             if (cnt > 0) {//if there is data
-                Printer.reset();
+                printer.resetExecutionTime();
 
                 byteInputStream = new ByteArrayInputStream(tempBuffer);
                 ais = new AudioInputStream(byteInputStream, getAudioFormat(), cnt); //open a new audiostream
@@ -328,10 +341,10 @@ public class RawGoogleRecognizer implements StandardRecognizer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Printer.printWithTimeF(TAG,
+                printer.printWithTimeF(TAG,
                     "boas size: " + boas.size() + " i: " + i + " cnt: " + cnt + " boas content: " + new String(
                         boas.toByteArray()));
-                Printer.printWithTimeF(TAG, "writing data");
+                printer.printWithTimeF(TAG, "writing data");
                 try {
                     stream.write(boas.toByteArray());//write FLAC audio data to the output stream to google
                     boas2.write(tempBuffer);
@@ -344,7 +357,7 @@ public class RawGoogleRecognizer implements StandardRecognizer {
             } else
                 run = false;
         }
-        Printer.printWithTime(TAG, "recording stopped");
+        printer.printWithTime(TAG, "recording stopped", verbose);
 
     }
 
