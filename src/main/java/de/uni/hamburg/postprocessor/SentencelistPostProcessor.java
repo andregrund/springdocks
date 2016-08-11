@@ -70,15 +70,18 @@ public class SentencelistPostProcessor implements StandardRecognizer {
     }
 
     public SentencelistPostProcessor(String sentenceFile, int numberOfResults, String key) {
+        final Printer printer = new Printer();
+        final boolean verbose = false;
+
         googleRecognizer = new RawGoogleRecognizer(key);
-        Printer.printWithTime(TAG, "loading phoneme database", );
+        printer.printWithTime(TAG, "loading phoneme database", verbose);
         pc = new PhonemeCreator(sentenceFile);
-        Printer.printWithTime(TAG, "getting phonemes for speech result", );
+        printer.printWithTime(TAG, "getting phonemes for speech result", verbose);
         ls = new Levenshtein();
         phonemesGrammar = pc.pdb.getArrayContent();
         this.numberOfResults = numberOfResults;
         referenceRecognizer = -1;
-        Printer.printWithTime(TAG, "SentencelistPostProcessor created", );
+        printer.printWithTime(TAG, "SentencelistPostProcessor created", verbose);
     }
 
     /**
@@ -88,25 +91,27 @@ public class SentencelistPostProcessor implements StandardRecognizer {
      */
     @Override
     public Result recognizeFromResult(Result result) {
+        final Printer printer = new Printer();
+        final boolean verbose = false;
         //get phonemes for r
-        List<PhonemeContainer> phonemesSpeech = pc.getPhonemes(result);
+        final List<PhonemeContainer> phonemesSpeech = pc.getPhonemes(result);
 
         if (phonemesSpeech != null) {
-            Printer.printWithTime(TAG, "calculating levenshtein distances", );
+            printer.printWithTime(TAG, "calculating levenshtein distances", verbose);
 
             int minDist = 10000;
 
             int tempResult = -1;
 
-            Printer.printWithTime(TAG, "phonemesGrammar.size: " + phonemesGrammar.size(), );
+            printer.printWithTime(TAG, "phonemesGrammar.size: " + phonemesGrammar.size(), verbose);
 
             //if one tempResult is preferred
             if (numberOfResults == 1) {
                 //calculate Levenshtein distance for n-best list vs sentence list
                 //take the minimal distance
-                for (int i = 0; i < phonemesSpeech.size(); i++) {
+                for (PhonemeContainer aPhonemesSpeech : phonemesSpeech) {
                     for (int j = 0; j < phonemesGrammar.size(); j++) {
-                        int diff = ls.diff(phonemesSpeech.get(i).getPhonemes(), phonemesGrammar.get(j).getPhonemes());
+                        int diff = ls.diff(aPhonemesSpeech.getPhonemes(), phonemesGrammar.get(j).getPhonemes());
                         if (diff <= minDist) {
                             if (diff < minDist) {
                                 minDist = diff;
@@ -118,7 +123,7 @@ public class SentencelistPostProcessor implements StandardRecognizer {
                     }
                 }
 
-                Printer.printWithTime(TAG, "tempResult is : " + tempResult, );
+                printer.printWithTime(TAG, "tempResult is : " + tempResult, verbose);
                 //return sentence with the minimal distance
                 //phonemesGrammar.get(tempResult).print();
                 result = new Result();
@@ -126,7 +131,7 @@ public class SentencelistPostProcessor implements StandardRecognizer {
 
             } else {
                 //do the same if more results are preferred
-                List<LevenshteinResult> resultList = new ArrayList<LevenshteinResult>();
+                final List<LevenshteinResult> resultList = new ArrayList<LevenshteinResult>();
                 for (int i = 0; i < phonemesSpeech.size(); i++) {
                     for (int j = 0; j < phonemesGrammar.size(); j++) {
                         int diff = ls.diff(phonemesSpeech.get(i).getPhonemes(), phonemesGrammar.get(j).getPhonemes());
@@ -144,7 +149,7 @@ public class SentencelistPostProcessor implements StandardRecognizer {
 
             }
 
-            Printer.printWithTimeF(TAG, "levenshtein distances calculated");
+            printer.printWithTimeF(TAG, "levenshtein distances calculated");
 
         }
         return result;

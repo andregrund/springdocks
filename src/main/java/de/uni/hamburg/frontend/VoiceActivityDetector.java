@@ -5,7 +5,7 @@ import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataBlocker;
 import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.frontend.FrontEnd;
-import edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter;
+//import edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter;
 import edu.cmu.sphinx.frontend.endpoint.SpeechClassifier;
 import edu.cmu.sphinx.frontend.endpoint.SpeechEndSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechMarker;
@@ -63,7 +63,7 @@ public class VoiceActivityDetector extends AudioInputStream {
         pipeline.add(new SpeechMarker(200, 300, 100));
 //        pipeline.add(new SpeechMarker(200, 300, 100, 30, 100, 15.0));
         //removes non speech
-        pipeline.add(new NonSpeechDataFilter());
+//        pipeline.add(new NonSpeechDataFilter());
 
         frontend = new FrontEnd(pipeline);
 

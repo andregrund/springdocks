@@ -49,7 +49,9 @@ public class PhonemeCreator {
      * @return
      */
     public List<PhonemeContainer> getPhonemes(Result r) {
-        Printer.printWithTimeF(TAG, "getting Phonemes");
+        final Printer printer = new Printer();
+
+        printer.printWithTimeF(TAG, "getting Phonemes");
 
         if (r == null)
             return null;
@@ -57,14 +59,14 @@ public class PhonemeCreator {
         List<String> rawResults = r.getResultList();
 
         List<PhonemeContainer> resultsWithPhonemes = new ArrayList<PhonemeContainer>();
-        Printer.printWithTimeF(TAG, "created lists");
+        printer.printWithTimeF(TAG, "created lists");
 
         try {
 
-            Printer.printWithTimeF(TAG, "formatting raw results");
+            printer.printWithTimeF(TAG, "formatting raw results");
             //convert all results to lowercase and remove special characters
             for (String s : rawResults) {
-                Printer.printWithTimeF(TAG, "raw result: " + s);
+                printer.printWithTimeF(TAG, "raw result: " + s);
 
                 s = s.replaceAll("[^a-zA-Z 0-9]", "");
                 s = s.replaceAll(" +", " ");
@@ -116,11 +118,7 @@ public class PhonemeCreator {
         if (!(new File(sequiturSphinxModel)).exists())
             try {
                 SequiturImport.importSequitur(sequiturFSAModel, sequiturSphinxModel);
-            } catch (JAXBException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
+            } catch (JAXBException | IOException e) {
                 e.printStackTrace();
             }
         g2pDecoder = new G2PConverter(sequiturSphinxModel);
@@ -156,7 +154,7 @@ public class PhonemeCreator {
             pdb = (PhonemeDB) o.readObject();
 
         } catch (IOException e) {
-//            System.err.println(e);
+            //            System.err.println(e);
 
             //if no cached phonemes are available cache ones
             fillDatabase(sentenceFile);
@@ -183,6 +181,7 @@ public class PhonemeCreator {
                 //						+ ".ser successfully");
 
             } catch (Exception e) {
+                //
             }
         }
     }
@@ -201,7 +200,7 @@ public class PhonemeCreator {
             //separate words and add the to the input arg
             while (in.hasNext()) {
                 temp = in.next();
-                if (temp.indexOf("\r") != -1) {
+                if (temp.contains("\r")) {
                     temp = temp.substring(0, temp.length() - 1);
                 } else
                     temp = temp.substring(0, temp.length());
@@ -248,11 +247,11 @@ public class PhonemeCreator {
                 try {
                     fos.close();
                 } catch (Exception e) {
+                    //
                 }
             }
 
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
