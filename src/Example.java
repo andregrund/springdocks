@@ -254,7 +254,7 @@ class Example {
 				sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
 				wordlist);
 
-		waitForEnter();
+//		waitForEnter();
 
 		filename = "data/front_fs_1387379085134_m1.wav";
 		sentence = "the door is in front of you";
@@ -263,7 +263,7 @@ class Example {
 				sphinxNGram, sphinxSentences, sphinxPostProcessorBigram,
 				sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
 				wordlist);
-		waitForEnter();
+//		waitForEnter();
 		filename = "data/home_fs_1387379071054_m1.wav";
 
 		sentence = "the kitchen is at home";
@@ -272,7 +272,7 @@ class Example {
 				sphinxNGram, sphinxSentences, sphinxPostProcessorBigram,
 				sphinxPostProcessorUnigram, sphinxPostProcessorSentences,
 				wordlist);
-		waitForEnter();
+//		waitForEnter();
 
 		filename = "data/show_fs_1387385878857_m1.wav";
 		sentence = "robot show me the pen";
@@ -362,7 +362,7 @@ class Example {
 		 exampleSimulation(key);
 		 
 		// starts the live recognition example
-		 exampleLive(key);
+//		 exampleLive(key);
 
 
 	}
