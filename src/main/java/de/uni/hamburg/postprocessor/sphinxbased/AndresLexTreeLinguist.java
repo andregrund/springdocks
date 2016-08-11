@@ -34,6 +34,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -1291,15 +1292,15 @@ public class AndresLexTreeLinguist implements Linguist {
 
                 if (wordNode.getWord() != sentenceEndWord) {
                     int index = 0;
-                    List<Node> list = new ArrayList<Node>();
-                    Unit[] rc = lastNode.getRC();
+                    List<Node> list = new ArrayList<>();
+                    //TODO:repair
+                    Unit[] rc = ((HMMNode)lastNode).getRC();
+//                    Unit[] rc = lastNode.getRC();
                     Unit left = wordNode.getLastUnit();
 
                     for (Unit unit : rc) {
                         Node[] epList = hmmTree.getEntryPoint(left, unit);
-                        for (Node n : epList) {
-                            list.add(n);
-                        }
+                        Collections.addAll(list, epList);
                     }
 
                     // add a link to every possible entry point as well

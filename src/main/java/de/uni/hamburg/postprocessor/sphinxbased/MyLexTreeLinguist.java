@@ -653,7 +653,9 @@ public class MyLexTreeLinguist implements Linguist {
         SearchStateArc createUnitStateArc(UnitNode hmmNode, LexTreeState previous) {
             SearchStateArc arc;
             // System.out.println("CUSA " + hmmNode);
-            float insertionProbability = calculateInsertionProbability(hmmNode);
+            //TODO:repair
+//            float insertionProbability = calculateInsertionProbability(hmmNode);
+            float insertionProbability = 1.0f;
             float smearProbability = getUnigramSmear(hmmNode) + previous.getSmearTerm();
             float languageProbability = smearProbability - previous.getSmearProb();
 
@@ -686,7 +688,9 @@ public class MyLexTreeLinguist implements Linguist {
         SearchStateArc createEndUnitArc(EndNode endNode, LexTreeState previous) {
             float smearProbability = getUnigramSmear(endNode) + previous.getSmearTerm();
             float languageProbability = smearProbability - previous.getSmearProb();
-            float insertionProbability = calculateInsertionProbability(endNode);
+            //TODO:repair
+//            float insertionProbability = calculateInsertionProbability(endNode);
+            float insertionProbability = 1.0f;
             return new LexTreeEndUnitState(endNode, getWordHistory(), previous.getSmearTerm(), smearProbability,
                 languageProbability, insertionProbability);
         }
@@ -969,7 +973,9 @@ public class MyLexTreeLinguist implements Linguist {
         public SearchStateArc[] getSuccessors() {
             System.out.println("LexTreeUnitState, getSuccessors");
             SearchStateArc[] arcs = new SearchStateArc[1];
-            HMM hmm = getHMMNode().getHMM();
+            //TODO: repair
+            HMM hmm = ((HMMNode) getHMMNode()).getHMM();
+//            HMM hmm = new HMMTree();
             arcs[0] = new LexTreeHMMState(getHMMNode(), getWordHistory(), getSmearTerm(), getSmearProb(),
                 hmm.getInitialState(), logOne, logOne, parentNode);
             return arcs;
@@ -1347,8 +1353,9 @@ public class MyLexTreeLinguist implements Linguist {
 
                 if (wordNode.getWord() != sentenceEndWord) {
                     int index = 0;
-                    List<Node> list = new ArrayList<Node>();
-                    Unit[] rc = lastNode.getRC();
+                    List<Node> list = new ArrayList<>();
+                    //TODO:repair
+                    Unit[] rc = ((HMMNode)lastNode).getRC();
                     Unit left = wordNode.getLastUnit();
 
                     for (Unit unit : rc) {
@@ -1426,19 +1433,20 @@ public class MyLexTreeLinguist implements Linguist {
      * @param abstractUnitNode the unit lex node
      * @return the insertion probability
      */
-    private float calculateInsertionProbability(AbstractUnitNode abstractUnitNode) {
-        int type = abstractUnitNode.getType();
-
-        if (type == UnitNode.SIMPLE_UNIT) {
-            return logUnitInsertionProbability;
-        } else if (type == UnitNode.WORD_BEGINNING_UNIT) {
-            return logUnitInsertionProbability + logWordInsertionProbability;
-        } else if (type == UnitNode.SILENCE_UNIT) {
-            return logSilenceInsertionProbability;
-        } else { // must be filler
-            return logFillerInsertionProbability;
-        }
-    }
+    //TODO:repair
+//    private float calculateInsertionProbability(AbstractUnitNode abstractUnitNode) {
+//        int type = abstractUnitNode.getType();
+//
+//        if (type == UnitNode.SIMPLE_UNIT) {
+//            return logUnitInsertionProbability;
+//        } else if (type == UnitNode.WORD_BEGINNING_UNIT) {
+//            return logUnitInsertionProbability + logWordInsertionProbability;
+//        } else if (type == UnitNode.SILENCE_UNIT) {
+//            return logSilenceInsertionProbability;
+//        } else { // must be filler
+//            return logFillerInsertionProbability;
+//        }
+//    }
 
     /**
      * Retrieves the unigram smear from the given node
