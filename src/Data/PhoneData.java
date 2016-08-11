@@ -37,7 +37,7 @@ public class PhoneData implements Data {
      *
      */
     String phoneID;
-    static LogMath logMath = LogMath.getLogMath();
+    static LogMath logMath = LogMath.getInstance();
     int method;
 
     /**

@@ -23,6 +23,8 @@
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -84,7 +86,10 @@ class Example {
 
 		// recognize from google
 		Result r = null;
-		r = rawGoogleRecognizer.recognizeFromFile(filename);
+		// mock google result
+		r = mockGoogleResult();
+//		r = rawGoogleRecognizer.recognizeFromFile(filename);
+
 
 		if (r != null) {
 			// print out result
@@ -365,5 +370,19 @@ class Example {
 //		 exampleLive(key);
 
 
+	}
+
+	private static Result mockGoogleResult() {
+		final Result result = new Result();
+		final List<String> resultStrings = new ArrayList<>();
+		result.addResult("theres a door in the bag");
+		result.addResult("theres a door in the back");
+		result.addResult("theres a door in the bed");
+		result.addResult("theres a boy in the back");
+		result.addResult("theres a door in a bag");
+		result.setConfidence(0.9128739f);
+		result.setHypPhoneme(null);
+		result.setRefPhoneme(null);
+		return result;
 	}
 }

@@ -173,7 +173,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
 
         this.logger = Logger.getLogger(getClass().getName());
         this.acousticModel = acousticModel;
-        logMath = LogMath.getLogMath();
+        logMath = LogMath.getInstance();
         this.grammar = grammar;
 
         this.logWordInsertionProbability = logMath.linearToLog(wordInsertionProbability);
@@ -205,7 +205,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         logger = ps.getLogger();
         acousticModel = (AcousticModel) ps.getComponent(ACOUSTIC_MODEL);
 
-        logMath = LogMath.getLogMath();
+        logMath = LogMath.getInstance();
         grammar = (Grammar) ps.getComponent(GRAMMAR);
 
         // get the rest of the configuration data
@@ -1096,7 +1096,6 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
             }
         }
 
-        @Override
         public float[] getComponentScore(final Data feature) {
             return new float[0];
         }
@@ -1291,7 +1290,6 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
             return initialState;
         }
 
-        @Override
         public boolean getWordTokenFirst() {
             return false;
         }

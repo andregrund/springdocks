@@ -87,8 +87,8 @@ public class VoiceActivityDetector extends AudioInputStream {
 		//classifies speech frames
 		pipeline.add(new SpeechClassifier(10, 0.015, 10, 0));
 		//marks as speech
-		pipeline.add(new SpeechMarker(200, 300, 100));
-//		pipeline.add(new SpeechMarker(200, 300, 100, 30, 100, 15.0));
+//		pipeline.add(new SpeechMarker(200, 300, 100));
+		pipeline.add(new SpeechMarker(200, 300, 100, 30, 100, 15.0));
 		//removes non speech
 //		pipeline.add(new NonSpeechDataFilter());
 
