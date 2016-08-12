@@ -132,7 +132,7 @@ public class AndresLexTreeLinguist implements Linguist {
 
     private Dictionary dictionary;
 
-    private UnitManager unitManager;
+//    private UnitManager unitManager;
 
     // ------------------------------------
     // Data that is configured by the
@@ -174,7 +174,7 @@ public class AndresLexTreeLinguist implements Linguist {
 
     private SearchGraph searchGraph;
 
-    private HMMPool hmmPool;
+//    private HMMPool hmmPool;
 
     private LRUCache<LexTreeState, SearchStateArc[]> arcCache;
 
@@ -196,7 +196,7 @@ public class AndresLexTreeLinguist implements Linguist {
 
         this.acousticModel = acousticModel;
         this.logMath = LogMath.getLogMath();
-        this.unitManager = unitManager;
+//        this.unitManager = unitManager;
         this.languageModel = languageModel;
         this.dictionary = dictionary;
 
@@ -231,7 +231,7 @@ public class AndresLexTreeLinguist implements Linguist {
         logMath = LogMath.getLogMath();
 
         acousticModel = (AcousticModel) ps.getComponent(PROP_ACOUSTIC_MODEL);
-        unitManager = (UnitManager) ps.getComponent(PROP_UNIT_MANAGER);
+//        unitManager = (UnitManager) ps.getComponent(PROP_UNIT_MANAGER);
         languageModel = (LanguageModel) ps.getComponent(PROP_LANGUAGE_MODEL);
         dictionary = (Dictionary) ps.getComponent(PROP_DICTIONARY);
 
@@ -340,20 +340,11 @@ public class AndresLexTreeLinguist implements Linguist {
         sentenceStartWordArray[0] = dictionary.getSentenceStartWord();
         maxDepth = languageModel.getMaxDepth();
 
-        generateHmmTree();
-
         TimerPool.getTimer(this, "Compile").stop();
         // Now that we are all done, dump out some interesting
         // information about the process
 
         searchGraph = new LexTreeSearchGraph(getInitialSearchState());
-    }
-
-    protected void generateHmmTree() {
-        hmmPool = new HMMPool(acousticModel, logger, unitManager);
-        hmmTree = new HMMTree(hmmPool, dictionary, languageModel, addFillerWords, languageWeight);
-
-        hmmPool.dumpInfo();
     }
 
     class LexTreeSearchGraph implements SearchGraph {
@@ -998,14 +989,14 @@ public class AndresLexTreeLinguist implements Linguist {
         /**
          * Constructs a LexTreeHMMState
          *
-         * @param hmmNode              the HMM state associated with this unit
+         * @param unitNode              the HMM state associated with this unit
          * @param wordSequence         the word history
          * @param languageProbability  the probability of the transition
          * @param insertionProbability the probability of the transition
          */
-        LexTreeHMMState(HMMNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb, HMMState hmmState,
+        LexTreeHMMState(UnitNode unitNode, WordSequence wordSequence, float smearTerm, float smearProb, HMMState hmmState,
             float languageProbability, float insertionProbability, Node parentNode) {
-            super(hmmNode, wordSequence, smearTerm, smearProb);
+            super(unitNode, wordSequence, smearTerm, smearProb);
             this.hmmState = hmmState;
             this.parentNode = parentNode;
             this.logLanguageProbability = languageProbability;
@@ -1153,6 +1144,7 @@ public class AndresLexTreeLinguist implements Linguist {
         }
 
         public float getScore(Data data) {
+
             return hmmState.getScore(data);
         }
 
@@ -1292,7 +1284,7 @@ public class AndresLexTreeLinguist implements Linguist {
 
                 if (wordNode.getWord() != sentenceEndWord) {
                     int index = 0;
-                    List<Node> list = new ArrayList<>();
+                    List<Node> nodeList = new ArrayList<>();
                     //TODO:repair
                     Unit[] rc = ((HMMNode)lastNode).getRC();
 //                    Unit[] rc = lastNode.getRC();
@@ -1300,13 +1292,13 @@ public class AndresLexTreeLinguist implements Linguist {
 
                     for (Unit unit : rc) {
                         Node[] epList = hmmTree.getEntryPoint(left, unit);
-                        Collections.addAll(list, epList);
+                        Collections.addAll(nodeList, epList);
                     }
 
                     // add a link to every possible entry point as well
                     // as link to the </s> node
-                    arcs = new SearchStateArc[list.size() + 1];
-                    for (Node node : list) {
+                    arcs = new SearchStateArc[nodeList.size() + 1];
+                    for (Node node : nodeList) {
                         arcs[index++] = createUnitStateArc((HMMNode) node, this);
                     }
 
