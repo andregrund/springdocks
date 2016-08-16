@@ -928,6 +928,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
+
             SearchStateArc[] arcs = getCachedSuccessors();
 
             if (arcs == null) {
