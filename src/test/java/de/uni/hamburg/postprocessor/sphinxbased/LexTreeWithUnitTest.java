@@ -18,10 +18,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JMockit.class)
 public class LexTreeWithUnitTest {
+
+    private static final String LEX_TREE_HMM_STATE_CLASS_NAME = "LexTreeHMMState";
+    private static final String LEX_TREE_STATE_CLASS_NAME = "LexTreeState";
 
     @Tested
     private LexTreeLinguist lexTreeLinguist;
@@ -59,8 +63,8 @@ public class LexTreeWithUnitTest {
         final float insertionProbability = 4F;
 
         final LexTreeLinguist.LexTreeHMMState lexTreeState = Deencapsulation
-            .newInnerInstance("LexTreeHMMState", lexTreeLinguist, hmmNode, wordSequence, smearTerm, smearProb, hmmState,
-                languageProbability, insertionProbability, parentNode);
+            .newInnerInstance(LEX_TREE_HMM_STATE_CLASS_NAME, lexTreeLinguist, hmmNode, wordSequence, smearTerm,
+                smearProb, hmmState, languageProbability, insertionProbability, parentNode);
 
         final float score = lexTreeState.getScore(data);
 
@@ -74,12 +78,27 @@ public class LexTreeWithUnitTest {
     }
 
     @Test
-    public void testLexTreeGetSuccessors(@Mocked Node parentNode) throws Exception {
+    public void testLexTreeGetSuccessorsNotNullNoCachedArcs(@Mocked Node parentNode, @Mocked HMMState hmmState,
+        @Mocked HMMNode hmmNode, @Mocked WordSequence wordSequence) throws Exception {
+        final float smearTerm = 1F;
+        final float smearProb = 2F;
+        final float languageProbability = 3F;
+        final float insertionProbability = 4F;
+        final LexTreeLinguist.LexTreeHMMState lexTreeState = Deencapsulation
+            .newInnerInstance(LEX_TREE_HMM_STATE_CLASS_NAME, lexTreeLinguist, hmmNode, wordSequence, smearTerm,
+                smearProb, hmmState, languageProbability, insertionProbability, parentNode);
         new Expectations() {{
             //@formatter:off
+            lexTreeState.getCachedArcs(); result = null;
+//            Deencapsulation.invoke(lexTreeState, "getCachedArcs"); result = false;
+//            lexTreeLinguistcacheEnabled; result = false;
             //@formatter:on
 
         }};
+
+
+
+        lexTreeState.getSuccessors();
         //        Ein cache mit arcs existiert cachedArcs, hole diesen
         //        Pruefe, ob exit state, bei Senone, ob nicht emitting!! (also nicht emitting==exit)
         //        fuer emitting states, mal gucken
