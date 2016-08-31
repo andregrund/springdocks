@@ -1,6 +1,7 @@
 package de.uni.hamburg.postprocessor.sphinxbased;
 
 import edu.cmu.sphinx.frontend.Data;
+import edu.cmu.sphinx.linguist.SearchStateArc;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.AcousticModel;
 import edu.cmu.sphinx.linguist.acoustic.HMMState;
@@ -18,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JMockit.class)
@@ -84,21 +84,18 @@ public class LexTreeWithUnitTest {
         final float smearProb = 2F;
         final float languageProbability = 3F;
         final float insertionProbability = 4F;
-        final LexTreeLinguist.LexTreeHMMState lexTreeState = Deencapsulation
+        final LexTreeLinguist.LexTreeHMMState lexTreeHMMState = Deencapsulation
             .newInnerInstance(LEX_TREE_HMM_STATE_CLASS_NAME, lexTreeLinguist, hmmNode, wordSequence, smearTerm,
                 smearProb, hmmState, languageProbability, insertionProbability, parentNode);
         new Expectations() {{
             //@formatter:off
-            lexTreeState.getCachedArcs(); result = null;
-//            Deencapsulation.invoke(lexTreeState, "getCachedArcs"); result = false;
-//            lexTreeLinguistcacheEnabled; result = false;
             //@formatter:on
 
         }};
 
 
 
-        lexTreeState.getSuccessors();
+        lexTreeHMMState.getSuccessors();
         //        Ein cache mit arcs existiert cachedArcs, hole diesen
         //        Pruefe, ob exit state, bei Senone, ob nicht emitting!! (also nicht emitting==exit)
         //        fuer emitting states, mal gucken
