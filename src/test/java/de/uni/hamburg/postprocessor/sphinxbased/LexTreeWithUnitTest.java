@@ -89,6 +89,7 @@ public class LexTreeWithUnitTest {
                 smearProb, hmmState, languageProbability, insertionProbability, parentNode);
         new Expectations() {{
             //@formatter:off
+            hmmState.isExitState(); result = false;
             //@formatter:on
 
         }};
