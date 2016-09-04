@@ -38,32 +38,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class MyLexTreeLinguist implements Linguist {
+public class ValLexTreeLinguist implements Linguist {
 
     /**
-     * The property that defines the grammar to use when building the search
-     * graph
+     * The property that defines the grammar to use when building the search graph
      */
     @S4Component(type = Grammar.class)
     private static final String PROP_GRAMMAR = "grammar";
 
     /**
-     * The property that defines the acoustic model to use when building the
-     * search graph
+     * The property that defines the acoustic model to use when building the search graph
      */
     @S4Component(type = AcousticModel.class)
     private static final String PROP_ACOUSTIC_MODEL = "acousticModel";
 
     /**
-     * The property that defines the unit manager to use when building the
-     * search graph
+     * The property that defines the unit manager to use when building the search graph
      */
     @S4Component(type = UnitManager.class, defaultClass = UnitManager.class)
     private static final String PROP_UNIT_MANAGER = "unitManager";
 
     /**
-     * The property that determines whether or not full word histories are used
-     * to determine when two states are equal.
+     * The property that determines whether or not full word histories are used to
+     * determine when two states are equal.
      */
     @S4Boolean(defaultValue = true)
     private static final String PROP_FULL_WORD_HISTORIES = "fullWordHistories";
@@ -81,24 +78,21 @@ public class MyLexTreeLinguist implements Linguist {
     private static final String PROP_DICTIONARY = "dictionary";
 
     /**
-     * The property that defines the size of the arc cache (zero to disable the
-     * cache).
+     * The property that defines the size of the arc cache (zero to disable the cache).
      */
     @S4Integer(defaultValue = 0)
     private static final String PROP_CACHE_SIZE = "cacheSize";
 
     /**
-     * The property that controls whether filler words are automatically added
-     * to the vocabulary
+     * The property that controls whether filler words are automatically added to the vocabulary
      */
     @S4Boolean(defaultValue = false)
     private static final String PROP_ADD_FILLER_WORDS = "addFillerWords";
 
     /**
-     * The property to control whether or not the linguist will generate unit
-     * states. When this property is false the linguist may omit UnitSearchState
-     * states. For some search algorithms this will allow for a faster search
-     * with more compact results.
+     * The property to control whether or not the linguist will generate unit states.   When this property is false the
+     * linguist may omit UnitSearchState states.  For some search algorithms this will allow for a faster search with
+     * more compact results.
      */
     @S4Boolean(defaultValue = false)
     private static final String PROP_GENERATE_UNIT_STATES = "generateUnitStates";
@@ -106,10 +100,10 @@ public class MyLexTreeLinguist implements Linguist {
     /**
      * The property that determines whether or not unigram probabilities are
      * smeared through the lextree. During the expansion of the tree the
-     * language probability could be only calculated when we reach word end
-     * node. Until that point we need to keep path alive and give it some
-     * language probability. See
-     * Alleva, F., Huang, X. & Hwang, M.-Y., "Improvements on the pronunciation
+     * language probability could be only calculated when we reach word end node.
+     * Until that point we need to keep path alive and give it some language
+     * probability. See
+     * Alleva, F., Huang, X. and Hwang, M.-Y., "Improvements on the pronunciation
      * prefix tree search organization", Proceedings of ICASSP, pp. 133-136,
      * Atlanta, GA, 1996.
      * for the description of this technique.
@@ -118,8 +112,7 @@ public class MyLexTreeLinguist implements Linguist {
     private static final String PROP_WANT_UNIGRAM_SMEAR = "wantUnigramSmear";
 
     /**
-     * The property that determines the weight of the smear. See
-     * {@link MyLexTreeLinguist#PROP_WANT_UNIGRAM_SMEAR}
+     * The property that determines the weight of the smear. See {@link edu.cmu.sphinx.linguist.lextree.LexTreeLinguist#PROP_WANT_UNIGRAM_SMEAR}
      */
     @S4Double(defaultValue = 1.0)
     private static final String PROP_UNIGRAM_SMEAR_WEIGHT = "unigramSmearWeight";
@@ -193,7 +186,7 @@ public class MyLexTreeLinguist implements Linguist {
 
     private int cacheHits;
 
-    public MyLexTreeLinguist(AcousticModel acousticModel, UnitManager unitManager, LanguageModel languageModel,
+    public ValLexTreeLinguist(AcousticModel acousticModel, UnitManager unitManager, LanguageModel languageModel,
         Dictionary dictionary, boolean fullWordHistories, boolean wantUnigramSmear, double wordInsertionProbability,
         double silenceInsertionProbability, double fillerInsertionProbability, double unitInsertionProbability,
         float languageWeight, boolean addFillerWords, boolean generateUnitStates, float unigramSmearWeight,
@@ -224,7 +217,7 @@ public class MyLexTreeLinguist implements Linguist {
         }
     }
 
-    public MyLexTreeLinguist() {
+    public ValLexTreeLinguist() {
 
     }
 
@@ -438,7 +431,6 @@ public class MyLexTreeLinguist implements Linguist {
          * @param wordSequence the history of words up until this point
          */
         LexTreeState(Node node, WordSequence wordSequence, float smearTerm, float smearProb) {
-            System.out.println("LexTreeState erstellt");
             this.node = node;
             this.wordSequence = wordSequence;
             currentSmearTerm = smearTerm;
@@ -578,7 +570,6 @@ public class MyLexTreeLinguist implements Linguist {
          * @return a list of SearchState objects
          */
         public SearchStateArc[] getSuccessors() {
-            //      System.out.println("LexTreeState, getSuccessors");
             SearchStateArc[] arcs = getCachedArcs();
             if (arcs == null) {
                 arcs = getSuccessors(node);
@@ -590,6 +581,7 @@ public class MyLexTreeLinguist implements Linguist {
         /**
          * Returns the list of successors to this state
          *
+         * @param theNode node to get successors
          * @return a list of SearchState objects
          */
         protected SearchStateArc[] getSuccessors(Node theNode) {
@@ -598,7 +590,7 @@ public class MyLexTreeLinguist implements Linguist {
             // System.out.println("Arc: "+ this);
             int i = 0;
             for (Node nextNode : nodes) {
-                // System.out.println(" " + nextNode);
+                //  System.out.println(" " + nextNode);
                 if (nextNode instanceof WordNode) {
                     arcs[i] = createWordStateArc((WordNode) nextNode, (UnitNode) getNode(), this);
                 } else if (nextNode instanceof EndNode) {
@@ -615,6 +607,8 @@ public class MyLexTreeLinguist implements Linguist {
          * Creates a word search state for the given word node
          *
          * @param wordNode the wordNode
+         * @param lastUnit last unit of the word
+         * @param previous previous state
          * @return the search state for the wordNode
          */
         protected SearchStateArc createWordStateArc(WordNode wordNode, UnitNode lastUnit, LexTreeState previous) {
@@ -654,7 +648,7 @@ public class MyLexTreeLinguist implements Linguist {
             SearchStateArc arc;
             // System.out.println("CUSA " + hmmNode);
             //TODO:repair
-//            float insertionProbability = calculateInsertionProbability(hmmNode);
+            //            float insertionProbability = calculateInsertionProbability(hmmNode);
             float insertionProbability = 1.0f;
             float smearProbability = getUnigramSmear(hmmNode) + previous.getSmearTerm();
             float languageProbability = smearProbability - previous.getSmearProb();
@@ -689,7 +683,7 @@ public class MyLexTreeLinguist implements Linguist {
             float smearProbability = getUnigramSmear(endNode) + previous.getSmearTerm();
             float languageProbability = smearProbability - previous.getSmearProb();
             //TODO:repair
-//            float insertionProbability = calculateInsertionProbability(endNode);
+            //            float insertionProbability = calculateInsertionProbability(endNode);
             float insertionProbability = 1.0f;
             return new LexTreeEndUnitState(endNode, getWordHistory(), previous.getSmearTerm(), smearProbability,
                 languageProbability, insertionProbability);
@@ -717,8 +711,7 @@ public class MyLexTreeLinguist implements Linguist {
         /**
          * Gets the successor arcs for this state from the cache
          *
-         * @return the next set of arcs for this state, or null if none can be
-         * found or if caching is disabled.
+         * @return the next set of arcs for this state, or null if none can be found or if caching is disabled.
          */
         SearchStateArc[] getCachedArcs() {
             if (cacheEnabled) {
@@ -768,7 +761,6 @@ public class MyLexTreeLinguist implements Linguist {
             float languageProbability, float insertionProbability) {
 
             super(endNode, wordSequence, smearTerm, smearProb);
-            System.out.println("LexTreeEndUnitState erstellt");
             logLanguageProbability = languageProbability;
             logInsertionProbability = insertionProbability;
             // System.out.println("LTEUS " + logLanguageProbability + " " +
@@ -841,7 +833,6 @@ public class MyLexTreeLinguist implements Linguist {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-            //      System.out.println("LexTreeEndUnitState, getSuccessors");
             SearchStateArc[] arcs = getCachedArcs();
             if (arcs == null) {
                 UnitNode[] nodes = getHMMNodes(getEndNode());
@@ -888,10 +879,7 @@ public class MyLexTreeLinguist implements Linguist {
          */
         LexTreeUnitState(UnitNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
             float languageProbability, float insertionProbability) {
-
             this(hmmNode, wordSequence, smearTerm, smearProb, languageProbability, insertionProbability, null);
-            System.out.println("LexTreeUnitState erstellt");
-
         }
 
         /**
@@ -971,11 +959,10 @@ public class MyLexTreeLinguist implements Linguist {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-            System.out.println("LexTreeUnitState, getSuccessors");
             SearchStateArc[] arcs = new SearchStateArc[1];
             //TODO: repair
             HMM hmm = ((HMMNode) getHMMNode()).getHMM();
-//            HMM hmm = new HMMTree();
+            //            HMM hmm = new HMMTree();
             arcs[0] = new LexTreeHMMState(getHMMNode(), getWordHistory(), getSmearTerm(), getSmearProb(),
                 hmm.getInitialState(), logOne, logOne, parentNode);
             return arcs;
@@ -1040,7 +1027,6 @@ public class MyLexTreeLinguist implements Linguist {
         LexTreeHMMState(UnitNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
             HMMState hmmState, float languageProbability, float insertionProbability, Node parentNode) {
             super(hmmNode, wordSequence, smearTerm, smearProb);
-            System.out.println("LexTreeHMMState erstellt");
             this.hmmState = hmmState;
             this.parentNode = parentNode;
             this.logLanguageProbability = languageProbability;
@@ -1201,7 +1187,6 @@ public class MyLexTreeLinguist implements Linguist {
         public float getScore(Data data) {
             String name = hmmState.getHMM().getBaseUnit().getName();
 
-
             // TODO: if numberOfTimesUsed != 0 then add a penalty to the score
             numberOfTimesUsed++;
 
@@ -1232,7 +1217,6 @@ public class MyLexTreeLinguist implements Linguist {
         LexTreeNonEmittingHMMState(UnitNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
             HMMState hmmState, float probability, Node parentNode) {
             super(hmmNode, wordSequence, smearTerm, smearProb, hmmState, logOne, probability, parentNode);
-            System.out.println("LexTreeNonEmittingHMMState erstellt");
         }
 
         @Override
@@ -1262,7 +1246,6 @@ public class MyLexTreeLinguist implements Linguist {
 
             super(wordNode, wordSequence, smearTerm, smearProb);
             // System.out.println("LTWS " + wordSequence);
-            System.out.println("LexTreeWordState erstellt");
             this.lastNode = lastNode;
             this.logLanguageProbability = languageProbability;
         }
@@ -1273,8 +1256,6 @@ public class MyLexTreeLinguist implements Linguist {
          * @return the pronunciation for this word
          */
         public Pronunciation getPronunciation() {
-            //      System.out.println("Pronounciation: "
-            //          + ((WordNode) getNode()).getPronunciation());
             return ((WordNode) getNode()).getPronunciation();
         }
 
@@ -1299,9 +1280,8 @@ public class MyLexTreeLinguist implements Linguist {
         }
 
         /**
-         * Gets the unique signature for this state. The signature building code
-         * is slow and should only be used for non-time-critical tasks such as
-         * plotting states.
+         * Gets the unique signature for this state. The signature building code is slow and should only be used for
+         * non-time-critical tasks such as plotting states.
          *
          * @return the signature
          */
@@ -1345,7 +1325,6 @@ public class MyLexTreeLinguist implements Linguist {
          */
         @Override
         public SearchStateArc[] getSuccessors() {
-            //      System.out.println("LexTreeWordState, getSuccessors");
             SearchStateArc[] arcs = getCachedArcs();
             if (arcs == null) {
                 arcs = EMPTY_ARC;
@@ -1355,7 +1334,7 @@ public class MyLexTreeLinguist implements Linguist {
                     int index = 0;
                     List<Node> list = new ArrayList<>();
                     //TODO:repair
-                    Unit[] rc = ((HMMNode)lastNode).getRC();
+                    Unit[] rc = ((HMMNode) lastNode).getRC();
                     Unit left = wordNode.getLastUnit();
 
                     for (Unit unit : rc) {
@@ -1373,11 +1352,8 @@ public class MyLexTreeLinguist implements Linguist {
                     }
 
                     // now add the link to the end of sentence arc:
-                    //          System.out.println("createWordStateArc: " + createWordStateArc(
-                    //              hmmTree.getSentenceEndWordNode(), lastNode, this));
 
                     arcs[index++] = createWordStateArc(hmmTree.getSentenceEndWordNode(), lastNode, this);
-
                 }
                 putCachedArcs(arcs);
             }
@@ -1390,11 +1366,11 @@ public class MyLexTreeLinguist implements Linguist {
         }
 
         /**
-         * Returns true if this LexTreeWordState indicates the start of a word.
-         * Returns false if this LexTreeWordState indicates the end of a word.
+         * Returns true if this LexTreeWordState indicates the start of a word. Returns false if this LexTreeWordState
+         * indicates the end of a word.
          *
-         * @return true if this LexTreeWordState indicates the start of a word,
-         * false if this LexTreeWordState indicates the end of a word
+         * @return true if this LexTreeWordState indicates the start of a word, false if this LexTreeWordState indicates
+         * the end of a word
          */
         public boolean isWordStart() {
             return false;
@@ -1417,7 +1393,6 @@ public class MyLexTreeLinguist implements Linguist {
         LexTreeEndWordState(WordNode wordNode, UnitNode lastNode, WordSequence wordSequence, float smearTerm,
             float smearProb, float logProbability) {
             super(wordNode, lastNode, wordSequence, smearTerm, smearProb, logProbability);
-            System.out.println("LexTreeEndWordState erstellt");
         }
 
         @Override
@@ -1434,19 +1409,19 @@ public class MyLexTreeLinguist implements Linguist {
      * @return the insertion probability
      */
     //TODO:repair
-//    private float calculateInsertionProbability(AbstractUnitNode abstractUnitNode) {
-//        int type = abstractUnitNode.getType();
-//
-//        if (type == UnitNode.SIMPLE_UNIT) {
-//            return logUnitInsertionProbability;
-//        } else if (type == UnitNode.WORD_BEGINNING_UNIT) {
-//            return logUnitInsertionProbability + logWordInsertionProbability;
-//        } else if (type == UnitNode.SILENCE_UNIT) {
-//            return logSilenceInsertionProbability;
-//        } else { // must be filler
-//            return logFillerInsertionProbability;
-//        }
-//    }
+    //    private float calculateInsertionProbability(AbstractUnitNode abstractUnitNode) {
+    //        int type = abstractUnitNode.getType();
+    //
+    //        if (type == UnitNode.SIMPLE_UNIT) {
+    //            return logUnitInsertionProbability;
+    //        } else if (type == UnitNode.WORD_BEGINNING_UNIT) {
+    //            return logUnitInsertionProbability + logWordInsertionProbability;
+    //        } else if (type == UnitNode.SILENCE_UNIT) {
+    //            return logSilenceInsertionProbability;
+    //        } else { // must be filler
+    //            return logFillerInsertionProbability;
+    //        }
+    //    }
 
     /**
      * Retrieves the unigram smear from the given node

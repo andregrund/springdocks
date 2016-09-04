@@ -221,10 +221,12 @@ public class LexTreeLinguist implements Linguist {
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
-    */
+     * (non-Javadoc)
+     *
+     * @see
+     * edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util
+     * .props.PropertySheet)
+     */
     public void newProperties(PropertySheet ps) throws PropertyException {
         logger = ps.getLogger();
         logMath = LogMath.getLogMath();
@@ -252,10 +254,10 @@ public class LexTreeLinguist implements Linguist {
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see edu.cmu.sphinx.linguist.Linguist#allocate()
-    */
+     * (non-Javadoc)
+     *
+     * @see edu.cmu.sphinx.linguist.Linguist#allocate()
+     */
     public void allocate() throws IOException {
         dictionary.allocate();
         acousticModel.allocate();
@@ -264,10 +266,10 @@ public class LexTreeLinguist implements Linguist {
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see edu.cmu.sphinx.linguist.Linguist#deallocate()
-    */
+     * (non-Javadoc)
+     *
+     * @see edu.cmu.sphinx.linguist.Linguist#deallocate()
+     */
     public void deallocate() throws IOException {
         if (acousticModel != null)
             acousticModel.deallocate();
@@ -279,10 +281,10 @@ public class LexTreeLinguist implements Linguist {
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see edu.cmu.sphinx.linguist.Linguist#getSearchGraph()
-    */
+     * (non-Javadoc)
+     *
+     * @see edu.cmu.sphinx.linguist.Linguist#getSearchGraph()
+     */
     public SearchGraph getSearchGraph() {
         return searchGraph;
     }
@@ -358,7 +360,8 @@ public class LexTreeLinguist implements Linguist {
     class LexTreeSearchGraph implements SearchGraph {
 
         /**
-         * An array of classes that represents the order in which the states will be returned.
+         * An array of classes that represents the order in which the states
+         * will be returned.
          */
 
         private SearchState initialState;
@@ -373,19 +376,19 @@ public class LexTreeLinguist implements Linguist {
         }
 
         /*
-        * (non-Javadoc)
-        *
-        * @see edu.cmu.sphinx.linguist.SearchGraph#getInitialState()
-        */
+         * (non-Javadoc)
+         *
+         * @see edu.cmu.sphinx.linguist.SearchGraph#getInitialState()
+         */
         public SearchState getInitialState() {
             return initialState;
         }
 
         /*
-        * (non-Javadoc)
-        *
-        * @see edu.cmu.sphinx.linguist.SearchGraph#getSearchStateOrder()
-        */
+         * (non-Javadoc)
+         *
+         * @see edu.cmu.sphinx.linguist.SearchGraph#getSearchStateOrder()
+         */
         public int getNumStateOrder() {
             return 6;
         }
@@ -396,11 +399,15 @@ public class LexTreeLinguist implements Linguist {
     }
 
     /**
-     * The LexTreeLinguist returns language states to the search manager. This class forms the base implementation for
-     * all language states returned. This LexTreeState keeps track of the probability of entering this state (a
-     * language+insertion probability) as well as the unit history. The unit history consists of the LexTree nodes that
-     * correspond to the left, center and right contexts.
-     * This is an abstract class, subclasses must implement the getSuccessorss method.
+     * The LexTreeLinguist returns language states to the search manager. This
+     * class forms the base implementation for all language states returned.
+     * This LexTreeState keeps track of the probability of entering this state
+     * (a language+insertion probability) as well as the unit history. The unit
+     * history consists of the LexTree nodes that correspond to the left, center
+     * and right contexts.
+     * <p/>
+     * This is an abstract class, subclasses must implement the getSuccessorss
+     * method.
      */
     abstract class LexTreeState implements SearchState, SearchStateArc {
 
@@ -426,8 +433,9 @@ public class LexTreeLinguist implements Linguist {
         }
 
         /**
-         * Gets the unique signature for this state. The signature building code is slow and should only be used for
-         * non-time-critical tasks such as plotting states.
+         * Gets the unique signature for this state. The signature building code
+         * is slow and should only be used for non-time-critical tasks such as
+         * plotting states.
          *
          * @return the signature
          */
