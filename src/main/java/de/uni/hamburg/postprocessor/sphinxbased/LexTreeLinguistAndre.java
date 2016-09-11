@@ -21,6 +21,7 @@ import edu.cmu.sphinx.linguist.acoustic.UnitManager;
 import edu.cmu.sphinx.linguist.dictionary.Dictionary;
 import edu.cmu.sphinx.linguist.dictionary.Pronunciation;
 import edu.cmu.sphinx.linguist.dictionary.Word;
+import edu.cmu.sphinx.linguist.flat.UnitState;
 import edu.cmu.sphinx.linguist.language.grammar.Grammar;
 import edu.cmu.sphinx.linguist.language.ngram.LanguageModel;
 import edu.cmu.sphinx.linguist.util.LRUCache;
@@ -848,7 +849,7 @@ public class LexTreeLinguistAndre implements Linguist {
     /**
      * Represents a unit in the search space
      */
-    public class LexTreeUnitState extends LexTreeState implements UnitSearchState {
+    private class LexTreeUnitState extends LexTreeState implements UnitSearchState {
 
         private float logInsertionProbability;
 
@@ -863,9 +864,9 @@ public class LexTreeLinguistAndre implements Linguist {
          *
          * @param wordSequence the history of words
          */
-        LexTreeUnitState(HMMNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
+        LexTreeUnitState(UnitNode unitNode, WordSequence wordSequence, float smearTerm, float smearProb,
             float languageProbability, float insertionProbability) {
-            this(hmmNode, wordSequence, smearTerm, smearProb, languageProbability, insertionProbability, null);
+            this(unitNode, wordSequence, smearTerm, smearProb, languageProbability, insertionProbability, null);
         }
 
         /**
@@ -873,9 +874,9 @@ public class LexTreeLinguistAndre implements Linguist {
          *
          * @param wordSequence the history of words
          */
-        LexTreeUnitState(HMMNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
+        LexTreeUnitState(UnitNode unitNode, WordSequence wordSequence, float smearTerm, float smearProb,
             float languageProbability, float insertionProbability, Node parentNode) {
-            super(hmmNode, wordSequence, smearTerm, smearProb);
+            super(unitNode, wordSequence, smearTerm, smearProb);
             this.logInsertionProbability = insertionProbability;
             this.logLanguageProbability = languageProbability;
             this.parentNode = parentNode;
@@ -1122,12 +1123,12 @@ public class LexTreeLinguistAndre implements Linguist {
                             if (arc.getHMMState() == hmmState && logInsertionProbability == arc.getLogProbability()) {
                                 nextStates[i] = this;
                             } else {
-                                nextStates[i] = new LexTreeHMMState((HMMNode) getNode(), getWordHistory(),
+                                nextStates[i] = new LexTreeHMMState((UnitNode) getNode(), getWordHistory(),
                                     getSmearTerm(), getSmearProb(), arc.getHMMState(), logOne, arc.getLogProbability(),
                                     parentNode);
                             }
                         } else {
-                            nextStates[i] = new LexTreeNonEmittingHMMState((HMMNode) getNode(), getWordHistory(),
+                            nextStates[i] = new LexTreeNonEmittingHMMState((UnitNode) getNode(), getWordHistory(),
                                 getSmearTerm(), getSmearProb(), arc.getHMMState(), arc.getLogProbability(), parentNode);
                         }
                     }
@@ -1157,10 +1158,12 @@ public class LexTreeLinguistAndre implements Linguist {
 
         public float getScore(Data data) {
             numberOfTimesUsed++;
+            final HMMNode node = (HMMNode) getNode();
+            final Unit baseUnit = node.getBaseUnit();
+            final String baseUnitName = baseUnit.getName();
 
             //TODO: find the name
-//            return hmmState.getScore(data);
-            return ((PhoneData) data).getConfusionScore("bla", numberOfTimesUsed);
+            return ((PhoneData) data).getConfusionScore(baseUnitName, numberOfTimesUsed);
         }
 
         public float[] getComponentScore(Data feature) {
@@ -1181,9 +1184,9 @@ public class LexTreeLinguistAndre implements Linguist {
          * @param wordSequence the word history
          * @param probability  the probability of the transition occurring
          */
-        LexTreeNonEmittingHMMState(HMMNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb,
+        LexTreeNonEmittingHMMState(UnitNode unitNode, WordSequence wordSequence, float smearTerm, float smearProb,
             HMMState hmmState, float probability, Node parentNode) {
-            super(hmmNode, wordSequence, smearTerm, smearProb, hmmState, logOne, probability, parentNode);
+            super(unitNode, wordSequence, smearTerm, smearProb, hmmState, logOne, probability, parentNode);
         }
 
         @Override
