@@ -40,7 +40,7 @@ public class LexTreeLinguistAndreTest {
      * But, you can instead use the wrapper and {@link Injectable}, yeah
      */
     @Test
-    public void testGetScore(@Mocked UnitNode unitNode, @Mocked WordSequence wordSequence,
+    public void testGetScore(@Mocked HMMNode unitNode, @Mocked WordSequence wordSequence,
         @Injectable("1.3") float smearTerm, @Injectable("2.3") float smearProb, @Mocked HMMState hmmState,
         @Injectable("3.3") float languageProbability, @Injectable("4.3") float insertionProbability,
         @Mocked Node parentNode, @Mocked PhoneData data) throws Exception {
