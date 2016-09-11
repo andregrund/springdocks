@@ -1001,14 +1001,14 @@ public class LexTreeLinguistAndre implements Linguist {
         /**
          * Constructs a LexTreeHMMState
          *
-         * @param hmmNode              the HMM state associated with this unit
+         * @param unitNode              the HMM state associated with this unit
          * @param wordSequence         the word history
          * @param languageProbability  the probability of the transition
          * @param insertionProbability the probability of the transition
          */
-        LexTreeHMMState(HMMNode hmmNode, WordSequence wordSequence, float smearTerm, float smearProb, HMMState hmmState,
+        LexTreeHMMState(UnitNode unitNode, WordSequence wordSequence, float smearTerm, float smearProb, HMMState hmmState,
             float languageProbability, float insertionProbability, Node parentNode) {
-            super(hmmNode, wordSequence, smearTerm, smearProb);
+            super(unitNode, wordSequence, smearTerm, smearProb);
             this.hmmState = hmmState;
             this.parentNode = parentNode;
             this.logLanguageProbability = languageProbability;

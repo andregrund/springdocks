@@ -24,11 +24,19 @@ import edu.cmu.sphinx.linguist.language.ngram.LanguageModel;
 import edu.cmu.sphinx.util.LogMath;
 import edu.cmu.sphinx.util.Utilities;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
-
-/** Represents a node in the HMM Tree */
+/**
+ * Represents a node in the HMM Tree
+ */
 
 // For large vocabularies we may create millions of these objects,
 // therefore they are extremely space sensitive. So we want to make
@@ -46,6 +54,7 @@ import java.util.logging.Logger;
 class Node {
 
     private static int nodeCount;
+
     private static int successorCount;
 
     /**
@@ -53,8 +62,8 @@ class Node {
      * tree freeze. Conversion to array helps to save memory.
      */
     private Object successors;
-    private float logUnigramProbability;
 
+    private float logUnigramProbability;
 
     /**
      * Creates a node
@@ -69,7 +78,6 @@ class Node {
         //        }
     }
 
-
     /**
      * Returns the unigram probability
      *
@@ -79,7 +87,6 @@ class Node {
         return logUnigramProbability;
     }
 
-
     /**
      * Sets the unigram probability
      *
@@ -88,7 +95,6 @@ class Node {
     public void setUnigramProbability(float probability) {
         logUnigramProbability = probability;
     }
-
 
     /**
      * Given an object get the set of successors for this object
@@ -101,7 +107,6 @@ class Node {
         return successors.get(key);
     }
 
-
     /**
      * Add the child to the set of successors
      *
@@ -112,7 +117,6 @@ class Node {
         Map<Object, Node> successors = getSuccessorMap();
         successors.put(key, child);
     }
-
 
     /**
      * Gets the successor map for this node
@@ -129,10 +133,11 @@ class Node {
         return (Map<Object, Node>) successors;
     }
 
-
-    /** Freeze the node. Convert the successor map into an array list */
+    /**
+     * Freeze the node. Convert the successor map into an array list
+     */
     void freeze() {
-        if (successors instanceof Map<?,?>) {
+        if (successors instanceof Map<?, ?>) {
             Map<Object, Node> map = getSuccessorMap();
             successors = map.values().toArray(new Node[map.size()]);
             for (Node node : map.values()) {
@@ -142,12 +147,10 @@ class Node {
         }
     }
 
-
     static void dumpNodeInfo() {
-        System.out.println("Nodes: " + nodeCount + " successors " +
-            successorCount + " avg " + (successorCount / nodeCount));
+        System.out
+            .println("Nodes: " + nodeCount + " successors " + successorCount + " avg " + (successorCount / nodeCount));
     }
-
 
     /**
      * Adds a child node holding an hmm to the successor.  If a node similar to the child has already been added, we use
@@ -171,7 +174,6 @@ class Node {
         }
         return child;
     }
-
 
     /**
      * Adds a child node holding a pronunciation to the successor. If a node similar to the child has already been
@@ -201,11 +203,9 @@ class Node {
         return child;
     }
 
-
     void addSuccessor(WordNode wordNode) {
         putSuccessor(wordNode, wordNode);
     }
-
 
     /**
      * Adds an EndNode to the set of successors for this node If a node similar to the child has already been added, we
@@ -229,14 +229,13 @@ class Node {
         return child;
     }
 
-
     /**
      * Adds a child node to the successor.  If a node similar to the child has already been added, we use the previously
      * added node, otherwise we add this. Also, we record the base unit of the child in the set of right context
      *
      * @param child the child to add
      * @return the node (may be different than child if there was already a node attached holding the hmm held by
-     *         child)
+     * child)
      */
     UnitNode addSuccessor(UnitNode child) {
         UnitNode matchingChild = (UnitNode) getSuccessor(child.getKey());
@@ -249,7 +248,6 @@ class Node {
         return child;
     }
 
-
     /**
      * Returns the successors for this node
      *
@@ -259,9 +257,8 @@ class Node {
         if (successors instanceof Map<?, ?>) {
             freeze();
         }
-        return (Node[])successors;
+        return (Node[]) successors;
     }
-
 
     /**
      * Returns the string representation for this object
@@ -274,11 +271,13 @@ class Node {
     }
 }
 
-
-/** A node representing a word in the HMM tree */
+/**
+ * A node representing a word in the HMM tree
+ */
 class WordNode extends Node {
 
     private final Pronunciation pronunciation;
+
     private final boolean isFinal;
 
     /**
@@ -293,7 +292,6 @@ class WordNode extends Node {
         this.isFinal = pronunciation.getWord().isSentenceEndWord();
     }
 
-
     /**
      * Gets the word associated with this node
      *
@@ -303,7 +301,6 @@ class WordNode extends Node {
         return pronunciation.getWord();
     }
 
-
     /**
      * Gets the pronunciation associated with this node
      *
@@ -312,7 +309,6 @@ class WordNode extends Node {
     Pronunciation getPronunciation() {
         return pronunciation;
     }
-
 
     /**
      * Gets the last unit for this word
@@ -324,7 +320,6 @@ class WordNode extends Node {
         return units[units.length - 1];
     }
 
-
     /**
      * Returns the successors for this node
      *
@@ -335,7 +330,6 @@ class WordNode extends Node {
         throw new Error("Not supported");
     }
 
-
     /**
      * Returns a string representation for this object
      *
@@ -343,16 +337,13 @@ class WordNode extends Node {
      */
     @Override
     public String toString() {
-        return "WordNode " + pronunciation + " p " +
-            getUnigramProbability();
+        return "WordNode " + pronunciation + " p " + getUnigramProbability();
     }
-
 
     public boolean isFinal() {
         return isFinal;
     }
 }
-
 
 /**
  * A class that represents the initial word in the search space. It is treated specially because we need to keep track
@@ -361,7 +352,6 @@ class WordNode extends Node {
 class InitialWordNode extends WordNode {
 
     final HMMNode parent;
-
 
     /**
      * Creates an InitialWordNode
@@ -374,7 +364,6 @@ class InitialWordNode extends WordNode {
         this.parent = parent;
     }
 
-
     /**
      * Gets the parent for this word node
      *
@@ -386,16 +375,17 @@ class InitialWordNode extends WordNode {
 
 }
 
-
 abstract class UnitNode extends Node {
 
     public final static int SIMPLE_UNIT = 1;
+
     public final static int WORD_BEGINNING_UNIT = 2;
+
     public final static int SILENCE_UNIT = 3;
+
     public final static int FILLER_UNIT = 4;
 
     private int type;
-
 
     /**
      * Creates the UnitNode
@@ -406,7 +396,6 @@ abstract class UnitNode extends Node {
         super(probablilty);
     }
 
-
     /**
      * Returns the base unit for this hmm node
      *
@@ -414,12 +403,9 @@ abstract class UnitNode extends Node {
      */
     abstract Unit getBaseUnit();
 
-
     abstract Object getKey();
 
-
     abstract HMMPosition getPosition();
-
 
     /**
      * Gets the unit type (one of SIMPLE_UNIT, WORD_BEGINNING_UNIT, SIMPLE_UNIT or FILLER_UNIT
@@ -429,7 +415,6 @@ abstract class UnitNode extends Node {
     int getType() {
         return type;
     }
-
 
     /**
      * Sets the unit type
@@ -442,7 +427,9 @@ abstract class UnitNode extends Node {
 
 }
 
-/** A node that represents an HMM in the hmm tree */
+/**
+ * A node that represents an HMM in the hmm tree
+ */
 
 class HMMNode extends UnitNode {
 
@@ -458,7 +445,6 @@ class HMMNode extends UnitNode {
     // during construction and the array after the freeze.
 
     private Object rcSet;
-
 
     /**
      * Creates the node, wrapping the given hmm
@@ -482,7 +468,6 @@ class HMMNode extends UnitNode {
         setType(type);
     }
 
-
     /**
      * Returns the base unit for this hmm node
      *
@@ -494,7 +479,6 @@ class HMMNode extends UnitNode {
         return hmm.getBaseUnit();
     }
 
-
     /**
      * Returns the hmm for this node
      *
@@ -504,18 +488,15 @@ class HMMNode extends UnitNode {
         return hmm;
     }
 
-
     @Override
     HMMPosition getPosition() {
         return hmm.getPosition();
     }
 
-
     @Override
     HMM getKey() {
         return getHMM();
     }
-
 
     /**
      * Returns a string representation for this object
@@ -527,7 +508,6 @@ class HMMNode extends UnitNode {
         return "HMMNode " + hmm + " p " + getUnigramProbability();
     }
 
-
     /**
      * Adds a right context to the set of possible right contexts for this node. This is typically only needed for hmms
      * at the ends of words.
@@ -538,8 +518,9 @@ class HMMNode extends UnitNode {
         getRCSet().add(rc);
     }
 
-
-    /** Freeze this node. Convert the set into an array to reduce memory overhead */
+    /**
+     * Freeze this node. Convert the set into an array to reduce memory overhead
+     */
     @Override
     @SuppressWarnings({"unchecked"})
     void freeze() {
@@ -549,7 +530,6 @@ class HMMNode extends UnitNode {
             rcSet = set.toArray(new Unit[set.size()]);
         }
     }
-
 
     /**
      * Gets the rc as a set. If we've already been frozen it is an error
@@ -566,7 +546,6 @@ class HMMNode extends UnitNode {
         return (Set<Unit>) rcSet;
     }
 
-
     /**
      * returns the set of right contexts for this node
      *
@@ -580,13 +559,13 @@ class HMMNode extends UnitNode {
     }
 }
 
-
 class EndNode extends UnitNode {
 
     final Unit baseUnit;
-    final Unit leftContext;
-    final Integer key;
 
+    final Unit leftContext;
+
+    final Integer key;
 
     /**
      * Creates the node, wrapping the given hmm
@@ -602,7 +581,6 @@ class EndNode extends UnitNode {
         key = baseUnit.getBaseID() * 121 + leftContext.getBaseID();
     }
 
-
     /**
      * Returns the base unit for this hmm node
      *
@@ -613,7 +591,6 @@ class EndNode extends UnitNode {
         return baseUnit;
     }
 
-
     /**
      * Returns the base unit for this hmm node
      *
@@ -623,18 +600,15 @@ class EndNode extends UnitNode {
         return leftContext;
     }
 
-
     @Override
     Integer getKey() {
         return key;
     }
 
-
     @Override
     HMMPosition getPosition() {
         return HMMPosition.END;
     }
-
 
     /**
      * Returns a string representation for this object
@@ -646,15 +620,14 @@ class EndNode extends UnitNode {
         return "EndNode base:" + baseUnit + " lc " + leftContext + ' ' + key;
     }
 
-
-    /** Freeze this node. Convert the set into an array to reduce memory overhead */
+    /**
+     * Freeze this node. Convert the set into an array to reduce memory overhead
+     */
     @Override
     void freeze() {
         super.freeze();
     }
 }
-
-
 
 /**
  * Represents the vocabulary as a lex tree with nodes in the tree representing either words (WordNode) or units
@@ -663,25 +636,36 @@ class EndNode extends UnitNode {
 class HMMTree {
 
     private final HMMPool hmmPool;
+
     private InitialWordNode initialNode;
+
     private Dictionary dictionary;
 
     private LanguageModel lm;
+
     private final boolean addFillerWords;
+
     private final boolean addSilenceWord = true;
+
     private final Set<Unit> entryPoints = new HashSet<Unit>();
+
     private Set<Unit> exitPoints = new HashSet<Unit>();
+
     private Set<Word> allWords;
+
     private EntryPointTable entryPointTable;
+
     private boolean debug;
+
     private final float languageWeight;
 
     private final Map<Object, HMMNode[]> endNodeMap;
+
     private final Map<Pronunciation, WordNode> wordNodeMap;
 
     private WordNode sentenceEndWordNode;
-    private Logger logger;
 
+    private Logger logger;
 
     /**
      * Creates the HMMTree
@@ -692,8 +676,7 @@ class HMMTree {
      * @param addFillerWords if <code>false</code> add filler words
      * @param languageWeight the languageWeight
      */
-    HMMTree(HMMPool pool, Dictionary dictionary, LanguageModel lm,
-        boolean addFillerWords, float languageWeight) {
+    HMMTree(HMMPool pool, Dictionary dictionary, LanguageModel lm, boolean addFillerWords, float languageWeight) {
         this.hmmPool = pool;
         this.dictionary = dictionary;
         this.lm = lm;
@@ -706,7 +689,6 @@ class HMMTree {
         compile();
     }
 
-
     /**
      * Given a base unit and a left context, return the set of entry points into the lex tree
      *
@@ -718,7 +700,6 @@ class HMMTree {
         EntryPoint ep = entryPointTable.getEntryPoint(base);
         return ep.getEntryPointsFromLeftContext(lc).getSuccessors();
     }
-
 
     /**
      * Gets the  set of hmm nodes associated with the given end node
@@ -743,7 +724,7 @@ class HMMTree {
                 }
                 hmmNode.addRC(rc);
                 for (Node node : endNode.getSuccessors()) {
-                    WordNode wordNode = (WordNode)node;
+                    WordNode wordNode = (WordNode) node;
                     hmmNode.addSuccessor(wordNode);
                 }
             }
@@ -757,7 +738,6 @@ class HMMTree {
         return results;
     }
 
-
     /**
      * Returns the word node associated with the sentence end word
      *
@@ -768,15 +748,15 @@ class HMMTree {
         return sentenceEndWordNode;
     }
 
-
     //    private Object getKey(EndNode endNode) {
     //        Unit base = endNode.getBaseUnit();
     //        Unit lc = endNode.getLeftContext();
     //        return null;
     //    }
 
-
-    /** Compiles the vocabulary into an HMM Tree */
+    /**
+     * Compiles the vocabulary into an HMM Tree
+     */
     private void compile() {
         collectEntryAndExitUnits();
         entryPointTable = new EntryPointTable(entryPoints);
@@ -785,15 +765,15 @@ class HMMTree {
         freeze();
     }
 
-
-    /** Dumps the tree */
+    /**
+     * Dumps the tree
+     */
     void dumpTree() {
         System.out.println("Dumping Tree ...");
         Map<Node, Node> dupNode = new HashMap<Node, Node>();
         dumpTree(0, getInitialNode(), dupNode);
         System.out.println("... done Dumping Tree");
     }
-
 
     /**
      * Dumps the tree
@@ -814,8 +794,9 @@ class HMMTree {
         }
     }
 
-
-    /** Collects all of the entry and exit points for the vocabulary. */
+    /**
+     * Collects all of the entry and exit points for the vocabulary.
+     */
     private void collectEntryAndExitUnits() {
         Collection<Word> words = getAllWords();
         for (Word word : words) {
@@ -834,7 +815,6 @@ class HMMTree {
         }
     }
 
-
     /**
      * Called after the lex tree is built. Frees all temporary structures. After this is called, no more words can be
      * added to the lex tree.
@@ -849,15 +829,15 @@ class HMMTree {
         endNodeMap.clear();
     }
 
-
-    /** Adds the given collection of words to the lex tree */
+    /**
+     * Adds the given collection of words to the lex tree
+     */
     private void addWords() {
         Set<Word> words = getAllWords();
         for (Word word : words) {
             addWord(word);
         }
     }
-
 
     /**
      * Adds a single word to the lex tree
@@ -872,15 +852,13 @@ class HMMTree {
         }
     }
 
-
     /**
      * Adds the given pronunciation to the lex tree
      *
      * @param pronunciation the pronunciation
      * @param probability   the unigram probability
      */
-    private void addPronunciation(Pronunciation pronunciation,
-        float probability) {
+    private void addPronunciation(Pronunciation pronunciation, float probability) {
         Unit baseUnit;
         Unit lc;
         Unit rc;
@@ -901,7 +879,9 @@ class HMMTree {
                 rc = units[i + 1];
                 HMM hmm = hmmPool.getHMM(baseUnit, lc, rc, HMMPosition.INTERNAL);
                 if (hmm == null) {
-                    logger.severe("Missing HMM for unit " + baseUnit.getName() + " with lc=" + lc.getName() + " rc=" + rc.getName());
+                    logger.severe(
+                        "Missing HMM for unit " + baseUnit.getName() + " with lc=" + lc.getName() + " rc=" + rc
+                            .getName());
                 } else {
                     curNode = curNode.addSuccessor(hmm, probability);
                 }
@@ -921,7 +901,6 @@ class HMMTree {
         }
     }
 
-
     /**
      * Gets the unigram probability for the given word
      *
@@ -939,7 +918,6 @@ class HMMTree {
         }
         return prob;
     }
-
 
     /**
      * Returns the entire set of words, including filler words
@@ -965,7 +943,6 @@ class HMMTree {
         return allWords;
     }
 
-
     /**
      * Returns the initial node for this lex tree
      *
@@ -975,12 +952,12 @@ class HMMTree {
         return initialNode;
     }
 
-
-    /** The EntryPoint table is used to manage the set of entry points into the lex tree. */
+    /**
+     * The EntryPoint table is used to manage the set of entry points into the lex tree.
+     */
     class EntryPointTable {
 
         private final Map<Unit, EntryPoint> entryPoints;
-
 
         /**
          * Create the entry point table give the set of all possible entry point units
@@ -994,7 +971,6 @@ class HMMTree {
             }
         }
 
-
         /**
          * Given a CI unit, return the EntryPoint object that manages the entry point for the unit
          *
@@ -1005,24 +981,27 @@ class HMMTree {
             return entryPoints.get(baseUnit);
         }
 
-
-        /** Creates the entry point maps for all entry points. */
+        /**
+         * Creates the entry point maps for all entry points.
+         */
         void createEntryPointMaps() {
             for (EntryPoint ep : entryPoints.values()) {
                 ep.createEntryPointMap();
             }
         }
 
-
-        /** Freezes the entry point table */
+        /**
+         * Freezes the entry point table
+         */
         void freeze() {
             for (EntryPoint ep : entryPoints.values()) {
                 ep.freeze();
             }
         }
 
-
-        /** Dumps the entry point table */
+        /**
+         * Dumps the entry point table
+         */
         void dump() {
             for (EntryPoint ep : entryPoints.values()) {
                 ep.dump();
@@ -1030,18 +1009,24 @@ class HMMTree {
         }
     }
 
-
-    /** Manages a single entry point. */
+    /**
+     * Manages a single entry point.
+     */
     class EntryPoint {
 
         final Unit baseUnit;
-        final Node baseNode;      // second units and beyond start here
-        final Map<Unit, Node> unitToEntryPointMap;
-        List<Pronunciation> singleUnitWords;
-        int nodeCount;
-        Set<Unit> rcSet;
-        float totalProbability;
 
+        final Node baseNode;      // second units and beyond start here
+
+        final Map<Unit, Node> unitToEntryPointMap;
+
+        List<Pronunciation> singleUnitWords;
+
+        int nodeCount;
+
+        Set<Unit> rcSet;
+
+        float totalProbability;
 
         /**
          * Creates an entry point for the given unit
@@ -1056,7 +1041,6 @@ class HMMTree {
             this.totalProbability = LogMath.LOG_ZERO;
         }
 
-
         /**
          * Given a left context get a node that represents a single set of entry points into this unit
          *
@@ -1066,7 +1050,6 @@ class HMMTree {
         Node getEntryPointsFromLeftContext(Unit leftContext) {
             return unitToEntryPointMap.get(leftContext);
         }
-
 
         /**
          * Accumulates the probability for this entry point
@@ -1079,7 +1062,6 @@ class HMMTree {
             }
         }
 
-
         /**
          * Returns the probability for all words reachable from this node
          *
@@ -1089,8 +1071,9 @@ class HMMTree {
             return totalProbability;
         }
 
-
-        /** Once we have built the full entry point we can eliminate some fields */
+        /**
+         * Once we have built the full entry point we can eliminate some fields
+         */
         void freeze() {
             for (Node node : unitToEntryPointMap.values()) {
                 node.freeze();
@@ -1098,7 +1081,6 @@ class HMMTree {
             singleUnitWords = null;
             rcSet = null;
         }
-
 
         /**
          * Gets the base node for this entry point
@@ -1109,7 +1091,6 @@ class HMMTree {
             return baseNode;
         }
 
-
         /**
          * Adds a one-unit word to this entry point. Such single unit words need to be dealt with specially.
          *
@@ -1118,7 +1099,6 @@ class HMMTree {
         void addSingleUnitWord(Pronunciation p) {
             singleUnitWords.add(p);
         }
-
 
         /**
          * Gets the set of possible right contexts that we can transition to from this entry point
@@ -1135,7 +1115,6 @@ class HMMTree {
             }
             return rcSet;
         }
-
 
         /**
          * A version of createEntryPointMap that compresses common hmms across all entry points.
@@ -1165,7 +1144,6 @@ class HMMTree {
             }
         }
 
-
         /**
          * Connects the single unit words associated with this entry point.   The singleUnitWords list contains all
          * single unit pronunciations that have as their sole unit, the unit associated with this entry point. Entry
@@ -1181,9 +1159,8 @@ class HMMTree {
                     HMM hmm = hmmPool.getHMM(baseUnit, lc, rc, HMMPosition.SINGLE);
 
                     HMMNode tailNode;
-                    if (( tailNode = map.get(hmm)) == null) {
-                        tailNode = (HMMNode)
-                            epNode.addSuccessor(hmm, getProbability());
+                    if ((tailNode = map.get(hmm)) == null) {
+                        tailNode = (HMMNode) epNode.addSuccessor(hmm, getProbability());
                         map.put(hmm, tailNode);
                     } else {
                         epNode.putSuccessor(hmm, tailNode);
@@ -1198,8 +1175,7 @@ class HMMTree {
                         } else {
                             float prob = getWordUnigramProbability(p.getWord());
                             wordNode = tailNode.addSuccessor(p, prob, wordNodeMap);
-                            if (p.getWord() ==
-                                dictionary.getSentenceEndWord()) {
+                            if (p.getWord() == dictionary.getSentenceEndWord()) {
                                 sentenceEndWordNode = wordNode;
                             }
                         }
@@ -1208,7 +1184,6 @@ class HMMTree {
                 }
             }
         }
-
 
         /**
          * Connect the entry points that match the given rc to the given epNode
@@ -1225,11 +1200,11 @@ class HMMTree {
             }
         }
 
-
-        /** Dumps the entry point */
+        /**
+         * Dumps the entry point
+         */
         void dump() {
-            System.out.println("EntryPoint " + baseUnit + " RC Followers: "
-                + getEntryPointRC().size());
+            System.out.println("EntryPoint " + baseUnit + " RC Followers: " + getEntryPointRC().size());
             int count = 0;
             Collection<Unit> rcs = getEntryPointRC();
             System.out.print("    ");
@@ -1244,7 +1219,6 @@ class HMMTree {
             System.out.println();
         }
     }
-
 
 }
 
