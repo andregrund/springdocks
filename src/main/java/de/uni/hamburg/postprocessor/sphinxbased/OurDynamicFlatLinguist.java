@@ -11,7 +11,6 @@ import edu.cmu.sphinx.linguist.UnitSearchState;
 import edu.cmu.sphinx.linguist.WordSearchState;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.AcousticModel;
-import edu.cmu.sphinx.linguist.acoustic.HMMPosition;
 import edu.cmu.sphinx.linguist.acoustic.Unit;
 import edu.cmu.sphinx.linguist.acoustic.UnitManager;
 import edu.cmu.sphinx.linguist.dictionary.Pronunciation;
@@ -50,7 +49,7 @@ import java.util.logging.Logger;
  * Modified by Johannes Twiefel
  * <br/>
  * A simple form of the linguist. It makes the following simplifying assumptions: 1) Zero or one word per grammar node
- * 2) No fan-in allowed ever 3) No composites (yet) 4) Only Unit, HMMState, and pronunciation states (and the
+ * 2) No fan-in allowed ever 3) No composites (yet) 4) Only Unit, , and pronunciation states (and the
  * initial/final grammar state are in the graph (no word, alternative or grammar states attached). 5) Only valid
  * transitions (matching contexts) are allowed 6) No tree organization of units 7) Branching grammar states are
  * allowed
@@ -791,7 +790,7 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public String toString() {
-            return node + "["; //+ hmmPool.getUnit(lc) + ',' + hmmPool.getUnit(nextBaseID) + ']';
+            return node + "[";
         }
 
         /**
@@ -944,17 +943,17 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
             if (index == pronunciation.getUnits().length - 1) {
                 if (isContextIndependentUnit(pronunciation.getUnits()[index])) {
                     arcs = new SearchStateArc[1];
-                    arcs[0] = new OurFullHMMSearchState(this, index, lc, ANY);
+                    arcs[0] = new OurFullUnitSearchState(this, index, lc, ANY);
                 } else {
                     int[] nextUnits = gs.getNextUnits();
                     arcs = new SearchStateArc[nextUnits.length];
                     for (int i = 0; i < arcs.length; i++) {
-                        arcs[i] = new OurFullHMMSearchState(this, index, lc, nextUnits[i]);
+                        arcs[i] = new OurFullUnitSearchState(this, index, lc, nextUnits[i]);
                     }
                 }
             } else {
                 arcs = new SearchStateArc[1];
-                arcs[0] = new OurFullHMMSearchState(this, index, lc);
+                arcs[0] = new OurFullUnitSearchState(this, index, lc);
             }
             return arcs;
         }
@@ -1033,9 +1032,9 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
     }
 
     /**
-     * Represents a unit (as an HMM) in the search graph
+     * Represents a unit in the search graph
      */
-    private class OurFullHMMSearchState extends FlatSearchState implements UnitSearchState, ScoreProvider {
+    private class OurFullUnitSearchState extends FlatSearchState implements UnitSearchState, ScoreProvider {
 
         private final PronunciationState pState;
 
@@ -1046,25 +1045,25 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         private int numberOfTimesUsed = 0;
 
         /**
-         * Creates a FullHMMSearchState
+         * Creates a OurFullUnitSearchState
          *
          * @param p     the parent PronunciationState
          * @param which the index of the unit within the pronunciation
          * @param lc    the ID of the left context // können wir ignorieren
          */
-        OurFullHMMSearchState(PronunciationState p, int which, int lc) {
+        OurFullUnitSearchState(PronunciationState p, int which, int lc) {
             this(p, which, lc, p.getPronunciation().getUnits()[which + 1].getBaseID());
         }
 
         /**
-         * Creates a FullHMMSearchState
+         * Creates a OurFullUnitSearchState
          *
          * @param p     the parent PronunciationState
          * @param which the index of the unit within the pronunciation
          * @param lc    the ID of the left context // können wir ignorieren
          * @param rc    the ID of the right context // können wir ignorieren
          */
-        OurFullHMMSearchState(PronunciationState p, int which, int lc, int rc) {
+        OurFullUnitSearchState(PronunciationState p, int which, int lc, int rc) {
             this.pState = p;
             this.index = which;
             isLastUnitOfWord = which == p.getPronunciation().getUnits().length - 1;
@@ -1120,9 +1119,9 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
-            } else if (o instanceof OurFullHMMSearchState) {
-                OurFullHMMSearchState other = (OurFullHMMSearchState) o;
-                // the definition for equal for a FullHMMState:
+            } else if (o instanceof OurFullUnitSearchState) {
+                OurFullUnitSearchState other = (OurFullUnitSearchState) o;
+                // the definition for equal for a FullUnitState:
                 // Grammar Node equal
                 // Pronunciation equal
                 // index equal
@@ -1173,24 +1172,6 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
         }
 
         /**
-         * Determines the position of the unit within the word
-         *
-         * @return the position of the unit within the word
-         */
-        HMMPosition getPosition() {
-            int len = pState.getPronunciation().getUnits().length;
-            if (len == 1) {
-                return HMMPosition.SINGLE;
-            } else if (index == 0) {
-                return HMMPosition.BEGIN;
-            } else if (index == len - 1) {
-                return HMMPosition.END;
-            } else {
-                return HMMPosition.INTERNAL;
-            }
-        }
-
-        /**
          * Returns the order of this state type among all of the search states
          *
          * @return the order
@@ -1232,9 +1213,9 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
          */
         private SearchStateArc[] getNextArcs() {
             SearchStateArc[] arcs;
-            // this is the last state of the hmm
+            // this is the last state of the unit
             // so check to see if we are at the end
-            // of a word, if not get the next full hmm in the word
+            // of a word, if not get the next full unit in the word
             // otherwise generate arcs to the next set of words
 
             if (!isLastUnitOfWord()) {
