@@ -1,9 +1,7 @@
 package de.uni.hamburg.postprocessor.sphinxbased.lextree;
 
 import de.uni.hamburg.data.PhoneData;
-import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeHMMState;
-import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeLinguistAndre;
-import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeState;
+import de.uni.hamburg.postprocessor.sphinxbased.lextree.old.LexTreeHMMState;
 import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
 import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
 import edu.cmu.sphinx.linguist.SearchStateArc;

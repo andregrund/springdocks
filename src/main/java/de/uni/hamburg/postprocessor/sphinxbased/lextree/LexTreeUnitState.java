@@ -1,5 +1,6 @@
 package de.uni.hamburg.postprocessor.sphinxbased.lextree;
 
+import de.uni.hamburg.postprocessor.sphinxbased.lextree.old.LexTreeHMMState;
 import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
 import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
 import de.uni.hamburg.postprocessor.sphinxbased.node.UnitNode;

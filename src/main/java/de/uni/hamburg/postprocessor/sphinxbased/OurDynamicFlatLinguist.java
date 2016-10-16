@@ -1060,8 +1060,8 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
          *
          * @param p     the parent PronunciationState
          * @param which the index of the unit within the pronunciation
-         * @param lc    the ID of the left context // können wir ignorieren
-         * @param rc    the ID of the right context // können wir ignorieren
+         * @param lc    the ID of the left context
+         * @param rc    the ID of the right context
          */
         OurFullUnitSearchState(PronunciationState p, int which, int lc, int rc) {
             this.pState = p;
@@ -1104,7 +1104,6 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
          */
         @Override
         public int hashCode() {
-            // TODO: maybe improve hash by using AtomicInteger.getNext() from a class variable
             return pState.getGrammarState().getGrammarNode().hashCode() * 29 + pState.getPronunciation().hashCode() * 19
                 + index * 7;
         }
