@@ -1,7 +1,8 @@
 package de.uni.hamburg.postprocessor.sphinxbased;
 
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
 import edu.cmu.sphinx.frontend.Data;
-import edu.cmu.sphinx.linguist.SearchStateArc;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.AcousticModel;
 import edu.cmu.sphinx.linguist.acoustic.HMMState;

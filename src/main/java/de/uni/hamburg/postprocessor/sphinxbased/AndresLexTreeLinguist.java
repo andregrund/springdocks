@@ -1,5 +1,12 @@
 package de.uni.hamburg.postprocessor.sphinxbased;
 
+import de.uni.hamburg.postprocessor.sphinxbased.node.EndNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMTree;
+import de.uni.hamburg.postprocessor.sphinxbased.node.InitialWordNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
+import de.uni.hamburg.postprocessor.sphinxbased.node.UnitNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.WordNode;
 import edu.cmu.sphinx.decoder.scorer.ScoreProvider;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.linguist.HMMSearchState;
@@ -12,7 +19,6 @@ import edu.cmu.sphinx.linguist.WordSearchState;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.AcousticModel;
 import edu.cmu.sphinx.linguist.acoustic.HMM;
-import edu.cmu.sphinx.linguist.acoustic.HMMPool;
 import edu.cmu.sphinx.linguist.acoustic.HMMState;
 import edu.cmu.sphinx.linguist.acoustic.HMMStateArc;
 import edu.cmu.sphinx.linguist.acoustic.Unit;
@@ -1286,8 +1292,8 @@ public class AndresLexTreeLinguist implements Linguist {
                     int index = 0;
                     List<Node> nodeList = new ArrayList<>();
                     //TODO:repair
-                    Unit[] rc = ((HMMNode)lastNode).getRC();
-//                    Unit[] rc = lastNode.getRC();
+                    Unit[] rc = ((HMMNode)lastNode).getRightContexts();
+//                    Unit[] rc = lastNode.getRightContexts();
                     Unit left = wordNode.getLastUnit();
 
                     for (Unit unit : rc) {

@@ -1,6 +1,13 @@
-package de.uni.hamburg.postprocessor.sphinxbased;
+package de.uni.hamburg.postprocessor.sphinxbased.lextree;
 
 import de.uni.hamburg.data.PhoneData;
+import de.uni.hamburg.postprocessor.sphinxbased.node.EndNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMTree;
+import de.uni.hamburg.postprocessor.sphinxbased.node.InitialWordNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
+import de.uni.hamburg.postprocessor.sphinxbased.node.UnitNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.WordNode;
 import edu.cmu.sphinx.decoder.scorer.ScoreProvider;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.linguist.HMMSearchState;
@@ -1179,7 +1186,7 @@ public class ValLexTreeLinguist implements Linguist {
         //            // we are at the end of the word, so we transit to the
         //            // next grammar nodes
         //            GrammarState gs = pState.getGrammarState();             
-        //            arcs = gs.getNextGrammarStates(0, getRC());
+        //            arcs = gs.getNextGrammarStates(0, getRightContexts());
         //        }
         //        return arcs;
         //    }
@@ -1334,7 +1341,7 @@ public class ValLexTreeLinguist implements Linguist {
                     int index = 0;
                     List<Node> list = new ArrayList<>();
                     //TODO:repair
-                    Unit[] rc = ((HMMNode) lastNode).getRC();
+                    Unit[] rc = ((HMMNode) lastNode).getRightContexts();
                     Unit left = wordNode.getLastUnit();
 
                     for (Unit unit : rc) {

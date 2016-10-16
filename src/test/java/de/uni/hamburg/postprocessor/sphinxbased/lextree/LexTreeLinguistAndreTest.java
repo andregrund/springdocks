@@ -1,6 +1,11 @@
-package de.uni.hamburg.postprocessor.sphinxbased;
+package de.uni.hamburg.postprocessor.sphinxbased.lextree;
 
 import de.uni.hamburg.data.PhoneData;
+import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeHMMState;
+import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeLinguistAndre;
+import de.uni.hamburg.postprocessor.sphinxbased.lextree.LexTreeState;
+import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
+import de.uni.hamburg.postprocessor.sphinxbased.node.Node;
 import edu.cmu.sphinx.linguist.SearchStateArc;
 import edu.cmu.sphinx.linguist.WordSequence;
 import edu.cmu.sphinx.linguist.acoustic.HMMState;
@@ -51,7 +56,7 @@ public class LexTreeLinguistAndreTest {
             //@formatter:on
         }};
 
-        final LexTreeLinguistAndre.LexTreeHMMState lexTreeHmmState = Deencapsulation
+        final LexTreeHMMState lexTreeHmmState = Deencapsulation
             .newInnerInstance(LEX_TREE_HMM_STATE_CLASS_NAME, lexTreeLinguist, unitNode, wordSequence, smearTerm,
                 smearProb, hmmState, languageProbability, insertionProbability, parentNode);
 
@@ -65,7 +70,7 @@ public class LexTreeLinguistAndreTest {
         @Injectable Float smearTerm, @Injectable Float smearProb, @Mocked HMMState hmmState,
         @Injectable Float languageProbability, @Injectable Float insertionProbability, @Mocked Node parentNode,
         @Injectable("true") boolean cacheEnabled,
-        @Injectable LRUCache<LexTreeLinguistAndre.LexTreeState, SearchStateArc[]> arcCache) throws Exception {
+        @Injectable LRUCache<LexTreeState, SearchStateArc[]> arcCache) throws Exception {
 
         new Expectations() {{
             //@formatter:off
@@ -73,7 +78,7 @@ public class LexTreeLinguistAndreTest {
             //@formatter:on
         }};
 
-        final LexTreeLinguistAndre.LexTreeHMMState lexTreeHmmState = Deencapsulation
+        final LexTreeHMMState lexTreeHmmState = Deencapsulation
             .newInnerInstance(LEX_TREE_HMM_STATE_CLASS_NAME, lexTreeLinguist, unitNode, wordSequence, smearTerm,
                 smearProb, hmmState, languageProbability, insertionProbability, parentNode);
 
