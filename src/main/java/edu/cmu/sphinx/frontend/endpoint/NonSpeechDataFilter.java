@@ -10,13 +10,15 @@
  *
  */
 
-
 package edu.cmu.sphinx.frontend.endpoint;
 
-import edu.cmu.sphinx.frontend.*;
+import edu.cmu.sphinx.frontend.BaseDataProcessor;
+import edu.cmu.sphinx.frontend.Data;
+import edu.cmu.sphinx.frontend.DataEndSignal;
+import edu.cmu.sphinx.frontend.DataProcessingException;
+import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-
 
 /**
  * Given a sequence of Data, filters out the non-speech regions. The sequence of Data should have the speech and
@@ -41,8 +43,9 @@ public class NonSpeechDataFilter extends BaseDataProcessor {
         super.newProperties(ps);
     }
 
-
-    /** Initializes this data processor */
+    /**
+     * Initializes this data processor
+     */
     @Override
     public void initialize() {
         super.initialize();
@@ -50,20 +53,17 @@ public class NonSpeechDataFilter extends BaseDataProcessor {
         this.inSpeech = false;
     }
 
-
     @Override
     public Data getData() throws DataProcessingException {
         Data data = readData();
 
-        while (data != null
-            && !(data instanceof DataEndSignal) && !(data instanceof DataStartSignal)
+        while (data != null && !(data instanceof DataEndSignal) && !(data instanceof DataStartSignal)
             && !(data instanceof SpeechEndSignal) && !inSpeech) {
             data = readData();
         }
 
         return data;
     }
-
 
     private Data readData() {
         Data data = getPredecessor().getData();

@@ -9,7 +9,6 @@
  */
 package edu.cmu.sphinx.frontend.endpoint;
 
-
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataProcessingException;
@@ -26,34 +25,41 @@ import edu.cmu.sphinx.util.props.S4Component;
  * <br/>
  * Subband VAD is not implemented yet, default endpointer is used.
  * The frontend configuration with filtering should look like:
- *  <br/>
- *  <br/>
- *  &lt;item&gt;audioFileDataSource &lt;/item&gt;<br/>
- *  &lt;item&gt;dataBlocker &lt;/item&gt;<br/>
- *  &lt;item&gt;preemphasizer &lt;/item&gt;<br/>
- *  &lt;item&gt;windower &lt;/item&gt;<br/>
- *  &lt;item&gt;fft &lt;/item&gt;<br/>
- *  &lt;item&gt;wiener &lt;/item&gt;<br/>
- *  &lt;item&gt;speechClassifier &lt;/item&gt;<br/>
- *  &lt;item&gt;speechMarker &lt;/item&gt;<br/>
- *  &lt;item&gt;nonSpeechDataFilter &lt;/item&gt;<br/>
- *  &lt;item&gt;melFilterBank &lt;/item&gt;<br/>
- *  &lt;item&gt;dct &lt;/item&gt;<br/>
- *  &lt;item&gt;liveCMN &lt;/item&gt;<br/>
- *  &lt;item&gt;featureExtraction &lt;/item&gt;<br/>
+ * <br/>
+ * <br/>
+ * &lt;item&gt;audioFileDataSource &lt;/item&gt;<br/>
+ * &lt;item&gt;dataBlocker &lt;/item&gt;<br/>
+ * &lt;item&gt;preemphasizer &lt;/item&gt;<br/>
+ * &lt;item&gt;windower &lt;/item&gt;<br/>
+ * &lt;item&gt;fft &lt;/item&gt;<br/>
+ * &lt;item&gt;wiener &lt;/item&gt;<br/>
+ * &lt;item&gt;speechClassifier &lt;/item&gt;<br/>
+ * &lt;item&gt;speechMarker &lt;/item&gt;<br/>
+ * &lt;item&gt;nonSpeechDataFilter &lt;/item&gt;<br/>
+ * &lt;item&gt;melFilterBank &lt;/item&gt;<br/>
+ * &lt;item&gt;dct &lt;/item&gt;<br/>
+ * &lt;item&gt;liveCMN &lt;/item&gt;<br/>
+ * &lt;item&gt;featureExtraction &lt;/item&gt;<br/>
  */
 public class WienerFilter extends BaseDataProcessor {
 
     double[] prevNoise;
+
     double[] prevSignal;
+
     double[] prevInput;
 
     double lambda = 0.99;
+
     double gamma = 0.98;
+
     double etaMin = 1e-2;
+
     protected AbstractVoiceActivityDetector classifier;
 
-    /** The name of the transform matrix file */
+    /**
+     * The name of the transform matrix file
+     */
     @S4Component(type = AbstractVoiceActivityDetector.class)
     public final static String PROP_CLASSIFIER = "classifier";
 
@@ -101,15 +107,13 @@ public class WienerFilter extends BaseDataProcessor {
         System.arraycopy(signal, 0, prevSignal, 0, length);
         System.arraycopy(input, 0, prevInput, 0, length);
 
-        DoubleData outputData = new DoubleData(signal, inputDoubleData
-            .getSampleRate(),
+        DoubleData outputData = new DoubleData(signal, inputDoubleData.getSampleRate(),
             inputDoubleData.getFirstSampleNumber());
 
         return outputData;
     }
 
-    private double[] filter(double[] input, double[] smoothedInput,
-        double[] noise) {
+    private double[] filter(double[] input, double[] smoothedInput, double[] noise) {
         int length = input.length;
         double[] signal = new double[length];
 
@@ -130,8 +134,7 @@ public class WienerFilter extends BaseDataProcessor {
             if (classifier.isSpeech()) {
                 noise[i] = prevNoise[i];
             } else {
-                noise[i] = lambda * prevNoise[i] + (1 - lambda)
-                    * smoothedInput[i];
+                noise[i] = lambda * prevNoise[i] + (1 - lambda) * smoothedInput[i];
             }
         }
         return noise;
