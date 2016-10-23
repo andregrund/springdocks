@@ -128,16 +128,18 @@
     <!-- The frontend configuration                               -->
     <!-- ******************************************************** -->
  
-<component name="frontend" type="Frontend.PhoneFrontEnd">
-        
-    </component>
+    <!--<component name="frontend" type="Frontend.PhoneFrontEnd"/>-->
+    <component name="frontend" type="de.uni.hamburg.frontend.PhoneFrontEnd"/>
+
+    <!--</component>-->
 
     <!-- ******************************************************** -->
     <!-- The linguist  configuration                              -->
     <!-- ******************************************************** -->
 
 
-    <component name="flatLinguist" type="PostProcessor.SphinxBased.OurDynamicFlatLinguist">
+    <!--<component name="flatLinguist" type="PostProcessor.SphinxBased.OurDynamicFlatLinguist">-->
+    <component name="flatLinguist" type="de.uni.hamburg.postprocessor.sphinxbased.OurDynamicFlatLinguist">
         <property name="logMath" value="logMath"/>
         <property name="grammar" value="${grammar}"/>
         <property name="acousticModel" value="acousticModel"/>

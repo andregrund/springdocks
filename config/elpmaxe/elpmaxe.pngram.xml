@@ -127,7 +127,8 @@
     <!-- The linguist  configuration                              -->
     <!-- ******************************************************** -->
     
-    <component name="lexTreeLinguist" type="PostProcessor.SphinxBased.LexTreeLinguist">>
+    <!--<component name="lexTreeLinguist" type="de.uni.hamburg.postprocessor.sphinxbased.LexTreeLinguist">-->
+    <component name="lexTreeLinguist" type="edu.cmu.sphinx.linguist.lextree.LexTreeLinguist">
         <property name="logMath" value="logMath"/>
         <property name="acousticModel" value="wsj"/>
         <property name="languageModel" value="trigramModel"/>
@@ -203,9 +204,10 @@
     <!-- The frontend configuration                               -->
     <!-- ******************************************************** -->
     
-<component name="frontend" type="Frontend.PhoneFrontEnd">
-        
-    </component>
+    <!--<component name="frontend" type="Frontend.PhoneFrontEnd"/>-->
+    <component name="frontend" type="de.uni.hamburg.frontend.PhoneFrontEnd"/>
+
+    <!--</component>-->
 
 
 
