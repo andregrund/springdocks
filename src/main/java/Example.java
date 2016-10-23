@@ -221,7 +221,8 @@ class Example
         // file like wtm_experiment.sentences.txt
 
         //String configname = "wtm_experiment";
-        String configname = "config/andre/elpmaxe";
+//        String configname = "config/andre/elpmaxe";
+        String configname = "config/elpmaxe/elpmaxe";
 
         // initialize some recognizers
         System.out.println("Starting Raw Google");
@@ -301,7 +302,8 @@ class Example
     {
 
         // define config name
-        String configname = "config/andre/elpmaxe";
+//        String configname = "config/andre/elpmaxe";
+        String configname = "config/elpmaxe/elpmaxe";
 
         // load google
         System.out.println("Starting Raw Google");
@@ -418,13 +420,16 @@ class Example
         String key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw";
 
         //starts the simulation example
-        String configname = "config/andre/elpmaxe";
+//        String configname = "config/andre/elpmaxe";
+        String configname = "config/elpmaxe/elpmaxe";
 
         // initialize some recognizers
         System.out.println("Starting Raw Google");
         RawGoogleRecognizer rawGoogle = new RawGoogleRecognizer(key);
 
         System.out.println("Starting Google+Sphinx N-Gram");
+//        final SphinxBasedPostProcessor sphinxPostProcessorTrigram = new SphinxBasedPostProcessor(
+//                configname + ".mypngram.xml", configname + ".words", 0, 0, 0);
         final SphinxBasedPostProcessor sphinxPostProcessorTrigram = new SphinxBasedPostProcessor(
                 configname + ".pngram.xml", configname + ".words", 0, 0, 0);
 
@@ -651,8 +656,8 @@ class Example
         Printer.verbose = false;
 
         //starts the simulation example
-        String configname = "config/andre/elpmaxe";
-        //        String configname = "config/elpmaxe/elpmaxe";
+//        String configname = "config/andre/elpmaxe";
+        String configname = "config/elpmaxe/elpmaxe";
         
         final NISTAlign alignerrefshyp = new NISTAlign(true, true);
         

@@ -887,7 +887,6 @@ class HMMTree {
             for (int i = 1; i < units.length - 1; i++) {
                 baseUnit = units[i];
                 rc = units[i + 1];
-                //                HMM hmm = new MyHMM(baseUnit, lc, rc, HMMPosition.INTERNAL);
 
                 HMM hmm = hmmPool.getHMM(baseUnit, lc, rc, HMMPosition.INTERNAL);
 
@@ -996,8 +995,6 @@ class HMMTree {
         void createEntryPointMaps() {
             for (EntryPoint ep : entryPoints.values()) {
                 ep.createEntryPointMap();
-                //                System.out.println("EntryPoint "+ep.baseUnit+" hat "+ep.getNode().getSuccessors().length+ "Successor");
-
             }
         }
 
@@ -1131,12 +1128,13 @@ class HMMTree {
          * A version of createEntryPointMap that compresses common hmms across all entry points.
          */
         void createEntryPointMap() {
-            HashMap<HMM, Node> map = new HashMap<HMM, Node>();
-            HashMap<HMM, UnitNode> singleUnitMap = new HashMap<HMM, UnitNode>();
+            HashMap<HMM, Node> map = new HashMap<>();
+            HashMap<HMM, UnitNode> singleUnitMap = new HashMap<>();
 
             for (Unit lc : exitPoints) {
                 Node epNode = new Node(LogMath.LOG_ZERO);
-                for (Unit rc : getEntryPointRC()) {
+                final Collection<Unit> entryPointRightContexts = getEntryPointRC();
+                for (final Unit rc : entryPointRightContexts) {
                     HMM hmm = hmmPool.getHMM(baseUnit, lc, rc, HMMPosition.BEGIN);
                     Node addedNode;
 

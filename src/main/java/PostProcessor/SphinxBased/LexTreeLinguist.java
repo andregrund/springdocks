@@ -1371,7 +1371,6 @@ public class LexTreeLinguist implements Linguist {
 
                     arcs = new SearchStateArc[1];
                     arcs[0] = createUnitStateArc((UnitNode) lastNode, this);
-                    ;
                 } else if (wordNode.getWord() != sentenceEndWord) {
                     int index = 0;
                     List<Node> list = new ArrayList<Node>();
