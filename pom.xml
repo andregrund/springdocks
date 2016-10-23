@@ -36,13 +36,13 @@
                 <artifactId>javaFlacEncoder</artifactId>
                 <scope>system</scope>
                 <version>0.3.1</version>
-                <systemPath>${basedir}/../maven_libs/javaFlacEncoder-0.3.1.jar</systemPath>
+                <systemPath>${basedir}/lib/javaFlacEncoder-0.3.1.jar</systemPath>
             </dependency>
             <dependency>
                 <groupId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</groupId>
                 <artifactId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
                 <scope>system</scope>
-                <systemPath>${basedir}/../maven_libs/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar</systemPath>
+                <systemPath>${basedir}/lib/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar</systemPath>
             </dependency>
             <dependency>
                 <groupId>org.jmockit</groupId>
