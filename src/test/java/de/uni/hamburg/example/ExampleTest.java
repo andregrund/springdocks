@@ -11,6 +11,7 @@ import de.uni.hamburg.recognizer.SphinxRecognizer;
 import de.uni.hamburg.utils.Colors;
 import de.uni.hamburg.utils.ExampleChooser;
 import de.uni.hamburg.utils.Printer;
+import org.junit.Test;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -44,7 +45,7 @@ import java.io.IOException;
  * @author 7twiefel
  * @author 5grund
  */
-class Example {
+public class ExampleTest {
 
     // utility to test recognizers and postprocessors on an example audio file
     private static void testFile(String filename, String sentence, RawGoogleRecognizer rawGoogleRecognizer,
@@ -307,19 +308,26 @@ class Example {
         return builder.toString();
     }
 
-    public static void main(String[] args) {
+    @Test
+    public void testLive() throws Exception {
+        String key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw";
+        exampleSimulation(key);
+
+    }
+
+//    public static void main(String[] args) {
         //uncomment this to create a new configuration from a batch file
         //ConfigCreator.createConfig("elpmaxe", "./batch");
 
         //put your Google key here
         //String key = "yourkeyhere";
-        String key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw";
+//        String key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw";
 
         //starts the simulation example
-        exampleSimulation(key);
+//        exampleSimulation(key);
 
         // starts the live recognition example
 //        exampleLive(key);
 
-    }
+//    }
 }

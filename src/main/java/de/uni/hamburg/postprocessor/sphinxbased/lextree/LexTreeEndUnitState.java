@@ -1,6 +1,5 @@
 package de.uni.hamburg.postprocessor.sphinxbased.lextree;
 
-import de.uni.hamburg.postprocessor.sphinxbased.lextree.old.LexTreeHMMState;
 import de.uni.hamburg.postprocessor.sphinxbased.node.EndNode;
 import de.uni.hamburg.postprocessor.sphinxbased.node.HMMNode;
 import edu.cmu.sphinx.linguist.SearchStateArc;
