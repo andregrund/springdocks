@@ -150,7 +150,7 @@
     <!-- The Dictionary configuration                            -->
     <!-- ******************************************************** -->
     <component name="dictionary" 
-        type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
+        type="edu.cmu.sphinx.linguist.dictionary.TextDictionary">
         <property name="dictionaryPath"
                   value="${dictionaryfile}"/>
         <property name="fillerPath" 
