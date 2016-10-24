@@ -52,7 +52,7 @@
     <component name="recognizer" type="edu.cmu.sphinx.recognizer.Recognizer">
         <property name="decoder" value="decoder"/>
         <propertylist name="monitors">
-            <item>speedTracker </item>
+            <item>speedTracker</item>
         </propertylist>
     </component>
 
