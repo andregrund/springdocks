@@ -1,5 +1,6 @@
 package de.uni.hamburg.phoneme;
 
+import Phoneme.PhonemeDB;
 import de.uni.hamburg.data.Result;
 import de.uni.hamburg.utils.Printer;
 import edu.cmu.sphinx.linguist.g2p.G2PConverter;

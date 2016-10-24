@@ -2,8 +2,8 @@
     <!-- ******************************************************** -->
     <!-- frequently tuned properties                              -->
     <!-- ******************************************************** -->
-<property name="dictionaryfile" value="file:config/elpmaxe/model/elpmaxe.dic"/>
-<property name="languagemodelfile" value="file:config/elpmaxe/model/elpmaxe.lm"/>
+    <property name="dictionaryfile" value="file:config/elpmaxe/model/elpmaxe.dic"/>
+    <property name="languagemodelfile" value="file:config/elpmaxe/model/elpmaxe.lm"/>
 
     <property name="absoluteBeamWidth" value="1500"/>
     <property name="relativeBeamWidth" value="1E-80"/>
