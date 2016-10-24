@@ -67,55 +67,55 @@ public class TrueNgramDynamicFlatLinguist implements Linguist, Configurable {
      * The property used to define the grammar to use when building the search graph
      */
     @S4Component(type = Grammar.class)
-    private static final String GRAMMAR = "grammar";
+    public static final String GRAMMAR = "grammar";
 
     /**
      * The property used to define the unit manager to use when building the search graph
      */
     @S4Component(type = UnitManager.class)
-    private static final String UNIT_MANAGER = "unitManager";
+    public static final String UNIT_MANAGER = "unitManager";
 
     /**
      * The property used to define the acoustic model to use when building the search graph
      */
     @S4Component(type = AcousticModel.class)
-    private static final String ACOUSTIC_MODEL = "acousticModel";
+    public static final String ACOUSTIC_MODEL = "acousticModel";
 
     /**
      * The property that specifies whether to add a branch for detecting out-of-grammar utterances.
      */
     @S4Boolean(defaultValue = false)
-    private static final String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
+    public static final String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
 
     /**
      * The property for the probability of entering the out-of-grammar branch.
      */
     @S4Double(defaultValue = 1.0)
-    private static final String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
+    public static final String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
 
     /**
      * The property for the probability of inserting a CI phone in the out-of-grammar ci phone loop
      */
     @S4Double(defaultValue = 1.0)
-    private static final String PHONE_INSERTION_PROBABILITY = "phoneInsertionProbability";
+    public static final String PHONE_INSERTION_PROBABILITY = "phoneInsertionProbability";
 
     /**
      * The property for the acoustic model to use to build the phone loop that detects out of grammar utterances.
      */
     @S4Component(type = AcousticModel.class)
-    private static final String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
+    public static final String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
 
     /**
      * The property for the language model to be used by this grammar
      */
     @S4Component(type = LanguageModel.class)
-    private static final String PROP_LANGUAGE_MODEL = "languageModel";
+    public static final String PROP_LANGUAGE_MODEL = "languageModel";
 
     /**
      * The property that defines the dictionary to use for this grammar
      */
     @S4Component(type = Dictionary.class)
-    private static final String PROP_DICTIONARY = "dictionary";
+    public static final String PROP_DICTIONARY = "dictionary";
 
     // ----------------------------------
     // Subcomponents that are configured

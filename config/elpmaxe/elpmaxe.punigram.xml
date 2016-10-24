@@ -24,7 +24,7 @@
     <property name="searchManager" value="simpleSearch"/>
     
     <!-- alternatives: ngramGrammar | jsgfGrammar | forcedAligner; only relevant with flatLinguist -->
-    <!--  <property name="grammar" value="jsgfGrammar"/>-->
+      <!--<property name="grammar" value="jsgfGrammar"/>-->
     <property name="grammar" value="ngramGrammar"/>
      
     <property name="frontend" value="frontend"/>
@@ -196,7 +196,8 @@
     <!-- ******************************************************** -->
     <!-- The Dictionary configuration                            -->
     <!-- ******************************************************** -->
-    <component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.FullDictionary">
+    <!--<component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.FullDictionary">-->
+    <component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.TextDictionary">
         <property name="dictionaryPath" value="${dictionaryfile}"/>
         <property name="fillerPath" value="${fillerPath}"/>
         <property name="addSilEndingPronunciation" value="false"/>

@@ -37,17 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-/*
- * Copyright 1999-2002 Carnegie Mellon University.
- * Portions Copyright 2002 Sun Microsystems, Inc.
- * Portions Copyright 2002 Mitsubishi Electric Research Laboratories.
- * All Rights Reserved.  Use is subject to license terms.
- *
- * See the file "license.terms" for information on usage and
- * redistribution of this file, and for a DISCLAIMER OF ALL
- * WARRANTIES.
- * Modified by Johannes Twiefel
- * <br/>
+/**
  * A simple form of the linguist. It makes the following simplifying assumptions: 1) Zero or one word per grammar node
  * 2) No fan-in allowed ever 3) No composites (yet) 4) Only Unit, , and pronunciation states (and the
  * initial/final grammar state are in the graph (no word, alternative or grammar states attached). 5) Only valid
@@ -64,43 +54,43 @@ public class OurDynamicFlatLinguist implements Linguist, Configurable {
      * The property used to define the grammar to use when building the search graph
      */
     @S4Component(type = Grammar.class)
-    private static final String GRAMMAR = "grammar";
+    public final static String GRAMMAR = "grammar";
 
     /**
      * The property used to define the unit manager to use when building the search graph
      */
     @S4Component(type = UnitManager.class)
-    private static final String UNIT_MANAGER = "unitManager";
+    public final static String UNIT_MANAGER = "unitManager";
 
     /**
      * The property used to define the acoustic model to use when building the search graph
      */
     @S4Component(type = AcousticModel.class)
-    private static final String ACOUSTIC_MODEL = "acousticModel";
+    public final static String ACOUSTIC_MODEL = "acousticModel";
 
     /**
      * The property that specifies whether to add a branch for detecting out-of-grammar utterances.
      */
     @S4Boolean(defaultValue = false)
-    private static final String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
+    public final static String ADD_OUT_OF_GRAMMAR_BRANCH = "addOutOfGrammarBranch";
 
     /**
      * The property for the probability of entering the out-of-grammar branch.
      */
     @S4Double(defaultValue = 1.0)
-    private static final String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
+    public final static String OUT_OF_GRAMMAR_PROBABILITY = "outOfGrammarProbability";
 
     /**
      * The property for the probability of inserting a CI phone in the out-of-grammar ci phone loop
      */
     @S4Double(defaultValue = 1.0)
-    private static final String PHONE_INSERTION_PROBABILITY = "phoneInsertionProbability";
+    public static final String PHONE_INSERTION_PROBABILITY = "phoneInsertionProbability";
 
     /**
      * The property for the acoustic model to use to build the phone loop that detects out of grammar utterances.
      */
     @S4Component(type = AcousticModel.class)
-    private static final String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
+    public final static String PHONE_LOOP_ACOUSTIC_MODEL = "phoneLoopAcousticModel";
 
     // ----------------------------------
     // Subcomponents that are configured

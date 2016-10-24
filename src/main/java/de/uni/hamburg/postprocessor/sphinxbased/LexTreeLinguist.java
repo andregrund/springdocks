@@ -50,50 +50,50 @@ public class LexTreeLinguist implements Linguist {
      * The property that defines the grammar to use when building the search graph
      */
     @S4Component(type = Grammar.class)
-    private static final String PROP_GRAMMAR = "grammar";
+    public static final String PROP_GRAMMAR = "grammar";
 
     /**
      * The property that defines the acoustic model to use when building the search graph
      */
     @S4Component(type = AcousticModel.class)
-    private static final String PROP_ACOUSTIC_MODEL = "acousticModel";
+    public static final String PROP_ACOUSTIC_MODEL = "acousticModel";
 
     /**
      * The property that defines the unit manager to use when building the search graph
      */
     @S4Component(type = UnitManager.class, defaultClass = UnitManager.class)
-    private static final String PROP_UNIT_MANAGER = "unitManager";
+    public static final String PROP_UNIT_MANAGER = "unitManager";
 
     /**
      * The property that determines whether or not full word histories are used to
      * determine when two states are equal.
      */
     @S4Boolean(defaultValue = true)
-    private static final String PROP_FULL_WORD_HISTORIES = "fullWordHistories";
+    public static final String PROP_FULL_WORD_HISTORIES = "fullWordHistories";
 
     /**
      * The property for the language model to be used by this grammar
      */
     @S4Component(type = LanguageModel.class)
-    private static final String PROP_LANGUAGE_MODEL = "languageModel";
+    public static final String PROP_LANGUAGE_MODEL = "languageModel";
 
     /**
      * The property that defines the dictionary to use for this grammar
      */
     @S4Component(type = Dictionary.class)
-    private static final String PROP_DICTIONARY = "dictionary";
+    public static final String PROP_DICTIONARY = "dictionary";
 
     /**
      * The property that defines the size of the arc cache (zero to disable the cache).
      */
     @S4Integer(defaultValue = 0)
-    private static final String PROP_CACHE_SIZE = "cacheSize";
+    public static final String PROP_CACHE_SIZE = "cacheSize";
 
     /**
      * The property that controls whether filler words are automatically added to the vocabulary
      */
     @S4Boolean(defaultValue = false)
-    private static final String PROP_ADD_FILLER_WORDS = "addFillerWords";
+    public static final String PROP_ADD_FILLER_WORDS = "addFillerWords";
 
     /**
      * The property to control whether or not the linguist will generate unit states.   When this property is false the
@@ -101,7 +101,7 @@ public class LexTreeLinguist implements Linguist {
      * more compact results.
      */
     @S4Boolean(defaultValue = false)
-    private static final String PROP_GENERATE_UNIT_STATES = "generateUnitStates";
+    public static final String PROP_GENERATE_UNIT_STATES = "generateUnitStates";
 
     /**
      * The property that determines whether or not unigram probabilities are
@@ -115,16 +115,16 @@ public class LexTreeLinguist implements Linguist {
      * for the description of this technique.
      */
     @S4Boolean(defaultValue = true)
-    private static final String PROP_WANT_UNIGRAM_SMEAR = "wantUnigramSmear";
+    public static final String PROP_WANT_UNIGRAM_SMEAR = "wantUnigramSmear";
 
     /**
      * The property that determines the weight of the smear. See {@link edu.cmu.sphinx.linguist.lextree.LexTreeLinguist#PROP_WANT_UNIGRAM_SMEAR}
      */
     @S4Double(defaultValue = 1.0)
-    private static final String PROP_UNIGRAM_SMEAR_WEIGHT = "unigramSmearWeight";
+    public static final String PROP_UNIGRAM_SMEAR_WEIGHT = "unigramSmearWeight";
 
     // just for detailed debugging
-    private final static SearchStateArc[] EMPTY_ARC = new SearchStateArc[0];
+    private final SearchStateArc[] EMPTY_ARC = new SearchStateArc[0];
 
     // ----------------------------------
     // Subcomponents that are configured
