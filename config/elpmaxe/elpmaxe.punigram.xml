@@ -25,7 +25,7 @@
     
     <!-- alternatives: ngramGrammar | jsgfGrammar | forcedAligner; only relevant with flatLinguist -->
     <!--  <property name="grammar" value="jsgfGrammar"/>-->
-       <property name="grammar" value="ngramGrammar"/>
+    <property name="grammar" value="ngramGrammar"/>
      
     <property name="frontend" value="frontend"/>
     <!-- The minimum amount of time in speech (in milliseconds) to be considered as utterance start -->
@@ -42,11 +42,11 @@
     <property name="wordInsertionProbability" value="0.5"/>
     <property name="languageWeight" value="0.2"/>
 
-        <property name="dictionaryPath" value="file:model/SpeechCorpus2011wtm.dic"/>
-        <property name="fillerPath" value="resource:/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/noisedict"/>
-       <property name="lmLocation" value="file:model/SpeechCorpus2011wtm.lm"/>
-        <property name="amLocation" value="resource:/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz"/>
-   <!-- ******************************************************** -->
+    <property name="dictionaryPath" value="file:model/SpeechCorpus2011wtm.dic"/>
+    <property name="fillerPath" value="resource:/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/noisedict"/>
+    <property name="lmLocation" value="file:model/SpeechCorpus2011wtm.lm"/>
+    <property name="amLocation" value="resource:/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz"/>
+    <!-- ******************************************************** -->
     <!-- The recognizer configuration                             -->
     <!-- ******************************************************** -->
     <component name="recognizer" type="edu.cmu.sphinx.recognizer.Recognizer">
@@ -129,9 +129,9 @@
     <!-- ******************************************************** -->
  
     <!--<component name="frontend" type="Frontend.PhoneFrontEnd"/>-->
-    <component name="frontend" type="de.uni.hamburg.frontend.PhoneFrontEnd"/>
+    <component name="frontend" type="de.uni.hamburg.frontend.PhoneFrontEnd">
 
-    <!--</component>-->
+    </component>
 
     <!-- ******************************************************** -->
     <!-- The linguist  configuration                              -->
@@ -140,13 +140,13 @@
 
     <!--<component name="flatLinguist" type="PostProcessor.SphinxBased.OurDynamicFlatLinguist">-->
     <component name="flatLinguist" type="de.uni.hamburg.postprocessor.sphinxbased.OurDynamicFlatLinguist">
+        <property name="unitManager" value="unitManager"/>
         <property name="logMath" value="logMath"/>
         <property name="grammar" value="${grammar}"/>
         <property name="acousticModel" value="acousticModel"/>
         <property name="wordInsertionProbability" value="${wordInsertionProbability}"/>
         <property name="silenceInsertionProbability" value="${silenceInsertionProbability}"/>
         <property name="languageWeight" value="${languageWeight}"/>
-        <property name="unitManager" value="unitManager"/>
     </component>
 
 
@@ -162,10 +162,9 @@
 
     <component name="jsgfGrammar" type="edu.cmu.sphinx.jsgf.JSGFGrammar">
         <property name="dictionary" value="dictionary"/>
-        <property name="grammarLocation" 
-             value="file:model/"/>
+        <property name="grammarLocation" value="file:model/"/>
         <property name="grammarName" value="SpeechCorpus2011wtm"/>
-	<property name="logMath" value="logMath"/>
+	    <property name="logMath" value="logMath"/>
     </component>
     
     <component name="ngram" type="edu.cmu.sphinx.linguist.language.ngram.SimpleNGramModel">
@@ -187,7 +186,7 @@
 
     <component name="unitManager" type="edu.cmu.sphinx.linguist.acoustic.UnitManager"/>
 
-   <component name="sphinx3Loader" type="edu.cmu.sphinx.linguist.acoustic.tiedstate.Sphinx3Loader">
+    <component name="sphinx3Loader" type="edu.cmu.sphinx.linguist.acoustic.tiedstate.Sphinx3Loader">
         <property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
         <property name="location" value="${amLocation}"/>
@@ -197,12 +196,9 @@
     <!-- ******************************************************** -->
     <!-- The Dictionary configuration                            -->
     <!-- ******************************************************** -->
-    <component name="dictionary"
-        type="edu.cmu.sphinx.linguist.dictionary.FullDictionary">
-        <property name="dictionaryPath"
-	 value="${dictionaryfile}"/>
-        <property name="fillerPath"
-	 value="${fillerPath}"/>
+    <component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.FullDictionary">
+        <property name="dictionaryPath" value="${dictionaryfile}"/>
+        <property name="fillerPath" value="${fillerPath}"/>
         <property name="addSilEndingPronunciation" value="false"/>
         <property name="allowMissingWords" value="false"/>
         <property name="unitManager" value="unitManager"/>
@@ -219,16 +215,16 @@
         <property name="logBase" value="1.0001"/>
         <property name="useAddTable" value="true"/>
     </component>
-    <component name="confidenceScorer"
-               type="edu.cmu.sphinx.result.MAPConfidenceScorer">
+
+    <component name="confidenceScorer" type="edu.cmu.sphinx.result.MAPConfidenceScorer">
         <property name="languageWeight" value="${languageWeight}"/>
     </component>
-    <component name="speedTracker" 
-                type="edu.cmu.sphinx.instrumentation.SpeedTracker">
+
+    <component name="speedTracker" type="edu.cmu.sphinx.instrumentation.SpeedTracker">
         <property name="recognizer" value="${recognizer}"/>
         <property name="frontend" value="${frontend}"/>
-	<property name="showSummary" value="true"/>
-	<property name="showDetails" value="false"/>
+	    <property name="showSummary" value="true"/>
+	    <property name="showDetails" value="false"/>
     </component>
 
 </config>

@@ -1,7 +1,7 @@
-package de.uni.hamburg.phoneme;
+package Phoneme;
 
-import Phoneme.PhonemeDB;
 import de.uni.hamburg.data.Result;
+import de.uni.hamburg.phoneme.SequiturImport;
 import de.uni.hamburg.utils.Printer;
 import edu.cmu.sphinx.linguist.g2p.G2PConverter;
 import edu.cmu.sphinx.linguist.g2p.Path;

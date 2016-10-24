@@ -2,8 +2,8 @@ package de.uni.hamburg.postprocessor;
 
 import de.uni.hamburg.data.LevenshteinResult;
 import de.uni.hamburg.data.Result;
-import de.uni.hamburg.phoneme.PhonemeContainer;
-import de.uni.hamburg.phoneme.PhonemeCreator;
+import Phoneme.PhonemeContainer;
+import Phoneme.PhonemeCreator;
 import de.uni.hamburg.postprocessor.levenshteinbased.Levenshtein;
 import de.uni.hamburg.recognizer.RawGoogleRecognizer;
 import de.uni.hamburg.recognizer.StandardRecognizer;

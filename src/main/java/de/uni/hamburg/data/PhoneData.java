@@ -1,6 +1,6 @@
 package de.uni.hamburg.data;
 
-import de.uni.hamburg.phoneme.PhonemeSubstitution;
+import Phoneme.PhonemeSubstitution;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.util.LogMath;
 

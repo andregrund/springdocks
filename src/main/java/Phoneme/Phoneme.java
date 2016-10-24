@@ -1,4 +1,4 @@
-package de.uni.hamburg.phoneme;
+package Phoneme;
 
 import de.uni.hamburg.phoneme.categories.Excitation;
 import de.uni.hamburg.phoneme.categories.MannerOfArticulation;

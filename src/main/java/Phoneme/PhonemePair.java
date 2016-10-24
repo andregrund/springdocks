@@ -1,4 +1,4 @@
-package de.uni.hamburg.phoneme;
+package Phoneme;
 
 public class PhonemePair {
 

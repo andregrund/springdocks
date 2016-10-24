@@ -2,8 +2,8 @@ package de.uni.hamburg.postprocessor;
 
 import de.uni.hamburg.data.Result;
 import de.uni.hamburg.frontend.PhoneFrontEnd;
-import de.uni.hamburg.phoneme.PhonemeContainer;
-import de.uni.hamburg.phoneme.PhonemeCreator;
+import Phoneme.PhonemeContainer;
+import Phoneme.PhonemeCreator;
 import de.uni.hamburg.recognizer.StandardRecognizer;
 import edu.cmu.sphinx.decoder.search.Token;
 import edu.cmu.sphinx.recognizer.Recognizer;

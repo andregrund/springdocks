@@ -1,4 +1,4 @@
-package de.uni.hamburg.phoneme;
+package Phoneme;
 
 import java.io.Serializable;
 import java.util.ArrayList;
